@@ -1,0 +1,761 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Vivelo — Retirement Reimagined</title>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Inter:wght@400;500;600&display=swap" rel="stylesheet"/>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --sage:#3D6B5E;--sage-light:#EAF2EF;--sage-mid:#6B9E8E;
+  --gold:#C49A2E;--gold-light:#FBF4E0;
+  --ink:#1A1F1C;--mist:#F5F7F5;--body:#4A524D;--border:#D8E4E0;
+  --purpose:#C49A2E;--purpose-l:#FEF3D0;
+  --connect:#3A7FC1;--connect-l:#E3EEF9;
+  --mind:#7B4FBB;--mind-l:#F0E8FA;
+  --body-p:#3D6B5E;--body-pl:#EAF2EF;
+}
+html{scroll-behavior:smooth}
+body{font-family:'Inter',sans-serif;color:var(--ink);background:#fff;font-size:16px;line-height:1.6}
+
+/* ── NAV ── */
+nav{display:flex;align-items:center;justify-content:space-between;padding:1.1rem 4rem;border-bottom:1px solid var(--border);background:#fff;position:sticky;top:0;z-index:200}
+.logo{font-family:'Fraunces',serif;font-size:1.7rem;font-weight:600;color:var(--sage);letter-spacing:-.02em;text-decoration:none}
+.logo span{color:var(--gold)}
+.nav-links{display:flex;gap:2rem;list-style:none}
+.nav-links a{text-decoration:none;color:var(--body);font-size:.9rem;font-weight:500;transition:color .2s}
+.nav-links a:hover{color:var(--sage)}
+.nav-cta{background:var(--sage);color:#fff;padding:.55rem 1.4rem;border-radius:50px;font-size:.9rem;font-weight:500;text-decoration:none;transition:background .2s;cursor:pointer;border:none}
+.nav-cta:hover{background:#2E5347}
+
+/* ── HERO ── */
+.hero{display:grid;grid-template-columns:1fr 1fr;gap:4rem;align-items:center;padding:5rem 4rem 4rem;max-width:1140px;margin:0 auto}
+.hero-label{font-size:.78rem;font-weight:600;letter-spacing:.12em;color:var(--gold);text-transform:uppercase;margin-bottom:1rem}
+.hero-h1{font-family:'Fraunces',serif;font-size:3.4rem;font-weight:300;line-height:1.12;color:var(--ink);margin-bottom:1.2rem}
+.hero-h1 em{font-style:italic;color:var(--sage)}
+.hero-sub{font-size:1.05rem;color:var(--body);line-height:1.75;margin-bottom:2rem;max-width:440px}
+.hero-btns{display:flex;gap:1rem;flex-wrap:wrap}
+.btn-primary{background:var(--sage);color:#fff;padding:.8rem 2rem;border-radius:50px;font-size:.95rem;font-weight:500;text-decoration:none;border:none;cursor:pointer;transition:background .2s;font-family:'Inter',sans-serif}
+.btn-primary:hover{background:#2E5347}
+.btn-outline{background:transparent;color:var(--sage);padding:.8rem 2rem;border-radius:50px;font-size:.95rem;font-weight:500;text-decoration:none;border:2px solid var(--sage);cursor:pointer;transition:all .2s;font-family:'Inter',sans-serif}
+.btn-outline:hover{background:var(--sage-light)}
+#heroCanvas{width:100%;height:440px;border-radius:20px;background:var(--mist);display:block}
+
+/* ── STATS ── */
+.stats-bar{background:var(--sage);padding:2.8rem 4rem;display:grid;grid-template-columns:repeat(4,1fr);gap:1rem;text-align:center}
+.stat-num{font-family:'Fraunces',serif;font-size:2.6rem;font-weight:300;color:#fff;line-height:1}
+.stat-label{font-size:.8rem;color:rgba(255,255,255,.7);margin-top:.3rem}
+
+/* ── SECTION WRAPPERS ── */
+.sec{padding:5rem 4rem;max-width:1140px;margin:0 auto}
+.sec-full{padding:5rem 4rem;background:var(--mist)}
+.sec-inner{max-width:1140px;margin:0 auto}
+.eyebrow{font-size:.75rem;font-weight:600;letter-spacing:.12em;color:var(--gold);text-transform:uppercase;margin-bottom:.8rem}
+h2{font-family:'Fraunces',serif;font-size:2.5rem;font-weight:300;line-height:1.2;color:var(--ink);margin-bottom:.9rem}
+h2 em{font-style:italic;color:var(--sage)}
+.sec-sub{font-size:1rem;color:var(--body);max-width:520px;line-height:1.75;margin-bottom:2.5rem}
+
+/* ── PILLARS ── */
+.pillars{display:grid;grid-template-columns:repeat(4,1fr);gap:1.2rem}
+.pillar{background:#fff;border:1px solid var(--border);border-radius:18px;padding:1.8rem 1.5rem;transition:box-shadow .2s,transform .2s;cursor:default}
+.pillar:hover{box-shadow:0 8px 28px rgba(61,107,94,.13);transform:translateY(-4px)}
+.p-icon{width:46px;height:46px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:1.4rem;margin-bottom:1rem}
+.pp .p-icon{background:var(--purpose-l)}
+.pc .p-icon{background:var(--connect-l)}
+.pm .p-icon{background:var(--mind-l)}
+.pb .p-icon{background:var(--body-pl)}
+.pillar h3{font-size:1.05rem;font-weight:600;margin-bottom:.45rem;color:var(--ink)}
+.pillar p{font-size:.87rem;color:var(--body);line-height:1.65}
+
+/* ── HOW IT WORKS ── */
+.steps{display:grid;grid-template-columns:repeat(3,1fr);gap:2.5rem}
+.step-num{font-family:'Fraunces',serif;font-size:3.5rem;font-weight:300;color:var(--border);line-height:1;margin-bottom:.4rem}
+.step h3{font-size:1rem;font-weight:600;color:var(--ink);margin-bottom:.4rem}
+.step p{font-size:.87rem;color:var(--body);line-height:1.65}
+
+/* ── LIFE MAP DEMO ── */
+.demo-shell{background:var(--gold-light);border:1px solid #E8D5A0;border-radius:24px;padding:3rem;text-align:center}
+#quizWrap{max-width:560px;margin:0 auto}
+.quiz-opts{display:flex;flex-direction:column;gap:.75rem;margin-top:1.2rem}
+.qopt{background:#fff;border:1.5px solid var(--border);border-radius:12px;padding:.9rem 1.2rem;font-size:.93rem;color:var(--body);text-align:left;cursor:pointer;transition:all .18s;font-family:'Inter',sans-serif;width:100%}
+.qopt:hover{border-color:var(--sage);color:var(--sage);background:var(--sage-light)}
+.qopt.sel{border-color:var(--sage);background:var(--sage);color:#fff}
+#miniWrap{display:none;padding-top:1rem}
+#miniCanvas{border-radius:16px;background:#fff;box-shadow:0 4px 20px rgba(0,0,0,.07);max-width:100%}
+.demo-note{font-size:.85rem;color:var(--body);margin-top:.8rem;font-style:italic}
+
+/* ── FEATURES ── */
+.features-grid{display:grid;grid-template-columns:1fr 1fr;gap:1.2rem}
+.feat{background:#fff;border:1px solid var(--border);border-radius:16px;padding:1.6rem;display:flex;gap:1rem;align-items:flex-start}
+.feat-ico{font-size:1.5rem;flex-shrink:0;margin-top:.1rem}
+.feat h3{font-size:.97rem;font-weight:600;color:var(--ink);margin-bottom:.35rem}
+.feat p{font-size:.85rem;color:var(--body);line-height:1.6}
+.feat-badge{display:inline-block;font-size:.7rem;font-weight:600;padding:.2rem .6rem;border-radius:50px;margin-bottom:.4rem;letter-spacing:.04em}
+.fb-free{background:var(--sage-light);color:var(--sage)}
+.fb-paid{background:#E3EEF9;color:#3A7FC1}
+
+/* ── PRICING ── */
+.pricing-grid{display:grid;grid-template-columns:1fr 1.08fr 1fr;gap:1.2rem;align-items:start}
+.pcard{border:1px solid var(--border);border-radius:20px;padding:2rem;background:#fff}
+.pcard.featured{border:2.5px solid var(--sage);background:var(--sage-light)}
+.pcard-badge{display:inline-block;background:var(--sage);color:#fff;font-size:.72rem;font-weight:600;padding:.25rem .75rem;border-radius:50px;margin-bottom:1rem;letter-spacing:.05em}
+.pcard h3{font-size:1.05rem;font-weight:600;color:var(--ink);margin-bottom:.2rem}
+.pcard .price{font-family:'Fraunces',serif;font-size:2.4rem;font-weight:300;color:var(--sage);margin:.5rem 0}
+.pcard .price sup{font-size:1rem;font-family:'Inter',sans-serif}
+.pcard .price sub{font-size:.9rem;font-family:'Inter',sans-serif;color:var(--body)}
+.pcard-desc{font-size:.85rem;color:var(--body);line-height:1.6;margin-bottom:1.2rem}
+.pcard-feats{list-style:none;font-size:.85rem;color:var(--body);margin-bottom:1.6rem}
+.pcard-feats li{padding:.32rem 0;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:.5rem}
+.pcard-feats li::before{content:"✓";color:var(--sage);font-weight:700;flex-shrink:0}
+.btn-pcard{display:block;text-align:center;padding:.7rem;border-radius:50px;font-size:.9rem;font-weight:500;cursor:pointer;border:none;font-family:'Inter',sans-serif;width:100%;transition:all .2s}
+.bpc-primary{background:var(--sage);color:#fff}
+.bpc-primary:hover{background:#2E5347}
+.bpc-outline{background:transparent;border:1.5px solid var(--sage);color:var(--sage)}
+.bpc-outline:hover{background:var(--sage-light)}
+
+/* ── TESTIMONIALS ── */
+.tgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:1.2rem}
+.tcard{background:#fff;border:1px solid var(--border);border-radius:16px;padding:1.6rem}
+.tstars{color:var(--gold);font-size:.9rem;margin-bottom:.8rem}
+.tcard blockquote{font-size:.9rem;color:var(--body);line-height:1.7;font-style:italic;margin-bottom:1rem}
+.tname{font-size:.82rem;font-weight:600;color:var(--ink)}
+.tsub{font-size:.77rem;color:var(--body)}
+
+/* ── FAQ ── */
+.faq{display:flex;flex-direction:column;gap:.7rem;max-width:740px}
+.faq-item{border:1px solid var(--border);border-radius:12px;overflow:hidden}
+.faq-q{width:100%;background:#fff;border:none;padding:1.05rem 1.25rem;text-align:left;font-size:.95rem;font-weight:500;color:var(--ink);cursor:pointer;display:flex;justify-content:space-between;align-items:center;font-family:'Inter',sans-serif;transition:background .15s}
+.faq-q:hover{background:var(--mist)}
+.faq-a{max-height:0;overflow:hidden;transition:max-height .3s ease,padding .3s}
+.faq-a.open{max-height:200px;padding:.8rem 1.25rem 1.1rem}
+.faq-a p{font-size:.87rem;color:var(--body);line-height:1.7}
+.faq-arrow{transition:transform .25s;color:var(--sage);font-size:.9rem}
+.faq-arrow.open{transform:rotate(180deg)}
+
+/* ── CTA BAND ── */
+.cta-band{background:var(--ink);padding:5rem 4rem;text-align:center}
+.cta-band h2{color:#fff;margin-bottom:.8rem}
+.cta-band h2 em{color:var(--gold)}
+.cta-band p{color:rgba(255,255,255,.65);font-size:1rem;max-width:480px;margin:0 auto 2rem}
+.cta-band .hero-btns{justify-content:center}
+.btn-primary-inv{background:var(--gold);color:var(--ink);padding:.8rem 2rem;border-radius:50px;font-size:.95rem;font-weight:600;text-decoration:none;border:none;cursor:pointer;font-family:'Inter',sans-serif;transition:background .2s}
+.btn-primary-inv:hover{background:#b88a25}
+.btn-outline-inv{background:transparent;color:#fff;padding:.8rem 2rem;border-radius:50px;font-size:.95rem;font-weight:500;border:2px solid rgba(255,255,255,.4);cursor:pointer;font-family:'Inter',sans-serif;transition:all .2s}
+.btn-outline-inv:hover{border-color:#fff}
+
+/* ── FOOTER ── */
+footer{background:#111;color:#fff;padding:3.5rem 4rem;display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:2.5rem}
+.footer-logo{font-family:'Fraunces',serif;font-size:1.5rem;font-weight:600;color:#fff;margin-bottom:.6rem;display:block}
+.footer-logo span{color:var(--gold)}
+footer .tagline{font-size:.83rem;color:rgba(255,255,255,.5);line-height:1.65;max-width:220px}
+footer h4{font-size:.74rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.45);margin-bottom:.9rem}
+footer ul{list-style:none}
+footer ul li{margin-bottom:.45rem}
+footer ul li a{color:rgba(255,255,255,.65);text-decoration:none;font-size:.84rem;transition:color .2s}
+footer ul li a:hover{color:#fff}
+.footer-bar{background:#000;text-align:center;font-size:.75rem;color:rgba(255,255,255,.35);padding:.9rem}
+
+/* ── PAGE SECTION NAV ── */
+.page-section{display:none}
+.page-section.active{display:block}
+
+/* ── QUESTIONNAIRE PAGE ── */
+.quiz-page{max-width:680px;margin:0 auto;padding:4rem 2rem}
+.quiz-page h2{margin-bottom:.4rem}
+.quiz-page .sec-sub{margin-bottom:2rem}
+.q-progress{height:5px;background:var(--border);border-radius:10px;margin-bottom:2.5rem;overflow:hidden}
+.q-bar{height:100%;background:var(--sage);border-radius:10px;transition:width .4s}
+.q-block{margin-bottom:2rem}
+.q-block label{display:block;font-weight:600;font-size:.95rem;color:var(--ink);margin-bottom:.7rem}
+.q-block textarea,.q-block input[type=text]{width:100%;border:1.5px solid var(--border);border-radius:10px;padding:.8rem 1rem;font-size:.93rem;font-family:'Inter',sans-serif;color:var(--ink);resize:vertical;transition:border .2s;min-height:80px}
+.q-block textarea:focus,.q-block input[type=text]:focus{outline:none;border-color:var(--sage)}
+.q-chips{display:flex;flex-wrap:wrap;gap:.5rem}
+.chip{background:var(--mist);border:1.5px solid var(--border);border-radius:50px;padding:.4rem 1rem;font-size:.85rem;color:var(--body);cursor:pointer;transition:all .18s;font-family:'Inter',sans-serif}
+.chip:hover,.chip.on{background:var(--sage);border-color:var(--sage);color:#fff}
+.q-nav{display:flex;justify-content:space-between;align-items:center;margin-top:2rem}
+.q-step-label{font-size:.82rem;color:var(--body)}
+
+/* ── RESULT PAGE ── */
+.result-page{max-width:860px;margin:0 auto;padding:4rem 2rem;text-align:center}
+#resultCanvas{border-radius:20px;background:var(--mist);max-width:100%;margin:2rem auto;display:block}
+.result-actions{display:flex;gap:1rem;justify-content:center;flex-wrap:wrap;margin-top:1.5rem}
+
+/* ── RESPONSIVE ── */
+@media(max-width:900px){
+  nav{padding:1rem 1.5rem}
+  .nav-links{display:none}
+  .hero{grid-template-columns:1fr;padding:3rem 1.5rem;gap:2rem}
+  .hero-h1{font-size:2.4rem}
+  .stats-bar{grid-template-columns:repeat(2,1fr);padding:2rem 1.5rem}
+  .sec{padding:3.5rem 1.5rem}
+  .sec-full{padding:3.5rem 1.5rem}
+  .pillars{grid-template-columns:repeat(2,1fr)}
+  .steps{grid-template-columns:1fr}
+  .features-grid{grid-template-columns:1fr}
+  .pricing-grid{grid-template-columns:1fr}
+  .tgrid{grid-template-columns:1fr}
+  footer{grid-template-columns:1fr 1fr;padding:2.5rem 1.5rem}
+  .cta-band{padding:4rem 1.5rem}
+}
+</style>
+</head>
+<body>
+
+<!-- ══ NAV ══ -->
+<nav>
+  <a class="logo" href="#" onclick="showPage('home')">Vive<span>lo</span></a>
+  <ul class="nav-links">
+    <li><a href="#" onclick="showPage('home');scrollTo('#how')">How it works</a></li>
+    <li><a href="#" onclick="showPage('home');scrollTo('#features')">Features</a></li>
+    <li><a href="#" onclick="showPage('home');scrollTo('#pricing')">Pricing</a></li>
+    <li><a href="#" onclick="showPage('home');scrollTo('#faq')">FAQ</a></li>
+  </ul>
+  <button class="nav-cta" onclick="showPage('quiz')">Build my map</button>
+</nav>
+
+<!-- ══════════════════════════════════════
+     HOME PAGE
+══════════════════════════════════════ -->
+<div id="page-home" class="page-section active">
+
+  <!-- HERO -->
+  <div style="background:#fff">
+    <div class="hero">
+      <div>
+        <div class="hero-label">Your next chapter starts here</div>
+        <h1 class="hero-h1">Retirement isn't an ending.<br><em>Make it your richest chapter.</em></h1>
+        <p class="hero-sub">Vivelo maps your strengths, wishes, and values across four life pillars — then turns that picture into a plan you'll actually follow.</p>
+        <div class="hero-btns">
+          <button class="btn-primary" onclick="showPage('quiz')">Build my life map</button>
+          <button class="btn-outline" onclick="document.getElementById('demo-anchor').scrollIntoView({behavior:'smooth'})">See a demo first</button>
+        </div>
+      </div>
+      <div>
+        <canvas id="heroCanvas" width="500" height="440"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <!-- STATS -->
+  <div class="stats-bar">
+    <div><div class="stat-num">4</div><div class="stat-label">Life pillars mapped</div></div>
+    <div><div class="stat-num">12k+</div><div class="stat-label">People re-energised</div></div>
+    <div><div class="stat-num">94%</div><div class="stat-label">Feel more motivated weekly</div></div>
+    <div><div class="stat-num">3 min</div><div class="stat-label">To your first life map</div></div>
+  </div>
+
+  <!-- PILLARS -->
+  <div class="sec-full">
+    <div class="sec-inner">
+      <div class="eyebrow">The framework</div>
+      <h2>Four pillars, <em>one coherent life</em></h2>
+      <p class="sec-sub">Everything in Vivelo is built around four interconnected dimensions. Strengthen one and the others follow.</p>
+      <div class="pillars">
+        <div class="pillar pp"><div class="p-icon">🎯</div><h3>Purpose</h3><p>Your anchor. Gives direction to how you spend Tuesday — and who you want to become over the next decade.</p></div>
+        <div class="pillar pc"><div class="p-icon">🤝</div><h3>Connections</h3><p>Relationships aren't nice-to-have. They regulate stress, sharpen your mind, and keep you accountable to what matters.</p></div>
+        <div class="pillar pm"><div class="p-icon">🧠</div><h3>Mind</h3><p>Curiosity is a muscle. Vivelo keeps it active through learning suggestions and challenges tuned to your interests.</p></div>
+        <div class="pillar pb"><div class="p-icon">🏃</div><h3>Body</h3><p>Energy is the foundation. Without it, purpose fades and connections shrink. We help you build sustainable daily habits.</p></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- HOW IT WORKS -->
+  <div class="sec" id="how">
+    <div class="eyebrow">How it works</div>
+    <h2>From blank page to <em>living plan</em></h2>
+    <p class="sec-sub">Three steps. No jargon. No overwhelm. A clear picture of where you are and where you want to go.</p>
+    <div class="steps">
+      <div class="step"><div class="step-num">01</div><h3>Tell us about yourself</h3><p>Answer a short set of questions about your strengths, interests, and wishes. Takes about 3 minutes. No right or wrong answers.</p></div>
+      <div class="step"><div class="step-num">02</div><h3>See your life map</h3><p>Vivelo generates a visual map across the four pillars. Print it, share it, build from it — not a score or a grade.</p></div>
+      <div class="step"><div class="step-num">03</div><h3>Get a plan that fits</h3><p>Choose a pillar to focus on. Vivelo suggests activities, local events, and weekly routines matched to your pace.</p></div>
+    </div>
+  </div>
+
+  <!-- DEMO -->
+  <div class="sec-full" id="demo-anchor">
+    <div class="sec-inner">
+      <div class="demo-shell">
+        <div class="eyebrow">Try it now — no account needed</div>
+        <h2>See your life map <em>in 30 seconds</em></h2>
+        <p class="sec-sub" style="margin:0 auto 1.5rem;text-align:center">One question. Instant result. Your real map takes 3 minutes.</p>
+        <div id="quizWrap">
+          <div id="demoQ">
+            <p style="font-weight:600;font-size:1rem;color:var(--ink);margin-bottom:.5rem">What feels most important to you right now?</p>
+            <div class="quiz-opts">
+              <button class="qopt" onclick="runDemo(this,'purpose')">I want to find a new sense of direction and meaning</button>
+              <button class="qopt" onclick="runDemo(this,'connect')">I want to stay socially active and meet new people</button>
+              <button class="qopt" onclick="runDemo(this,'mind')">I want to keep learning and stay mentally sharp</button>
+              <button class="qopt" onclick="runDemo(this,'body')">I want to move more and feel physically energised</button>
+            </div>
+          </div>
+          <div id="miniWrap">
+            <canvas id="miniCanvas" width="400" height="320"></canvas>
+            <p class="demo-note">This is a preview. Your full map covers all four pillars in detail.</p>
+            <div style="display:flex;gap:1rem;justify-content:center;margin-top:1rem;flex-wrap:wrap">
+              <button class="btn-primary" onclick="showPage('quiz')">Build my full life map →</button>
+              <button class="btn-outline" onclick="resetDemo()">Try another answer</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- FEATURES -->
+  <div class="sec" id="features">
+    <div class="eyebrow">What you get</div>
+    <h2>Built for real life, <em>not apps for apps' sake</em></h2>
+    <p class="sec-sub">Every feature answers one question: does this help someone live more fully today?</p>
+    <div class="features-grid">
+      <div class="feat"><div class="feat-ico">🗺️</div><div><span class="feat-badge fb-free">Free</span><h3>Personalised life map</h3><p>A visual diagram of who you are across the four pillars. Printable. Shareable. Yours to keep forever.</p></div></div>
+      <div class="feat"><div class="feat-ico">📅</div><div><span class="feat-badge fb-paid">Active plan</span><h3>AI weekly planner</h3><p>A real activity plan built from your map. Answers the "what do I do today?" question every single morning.</p></div></div>
+      <div class="feat"><div class="feat-ico">🔔</div><div><span class="feat-badge fb-paid">Active plan</span><h3>Daily reminders</h3><p>A gentle nudge for today's activity. Not spam — one message, well timed, easy to action.</p></div></div>
+      <div class="feat"><div class="feat-ico">✅</div><div><span class="feat-badge fb-paid">Active plan</span><h3>Task check-ins</h3><p>Mark activities done. Small wins compound. This is what keeps people subscribed after month one.</p></div></div>
+      <div class="feat"><div class="feat-ico">📍</div><div><span class="feat-badge fb-paid">Explorer</span><h3>Local activity finder</h3><p>Nearby events matched to your profile and interests — culture, sport, dining, sightseeing.</p></div></div>
+      <div class="feat"><div class="feat-ico">😊</div><div><span class="feat-badge fb-paid">Explorer</span><h3>Daily mood tips</h3><p>Micro-suggestions across body, mind, social, enjoyment, emotion, environment and purpose. One per day, not a flood.</p></div></div>
+    </div>
+  </div>
+
+  <!-- PRICING -->
+  <div class="sec-full" id="pricing">
+    <div class="sec-inner">
+      <div class="eyebrow">Pricing</div>
+      <h2>Simple, honest <em>pricing</em></h2>
+      <p class="sec-sub">Start free. Add what you need when you need it. No hidden fees.</p>
+      <div class="pricing-grid">
+        <div class="pcard">
+          <h3>Free</h3>
+          <div class="price"><sup>€</sup>0 <sub>forever</sub></div>
+          <p class="pcard-desc">See where you stand today. No credit card, no commitment.</p>
+          <ul class="pcard-feats">
+            <li>Full questionnaire</li>
+            <li>Personalised life map</li>
+            <li>Print & export your map</li>
+            <li>Demo preview</li>
+          </ul>
+          <button class="btn-pcard bpc-outline" onclick="showPage('quiz')">Get started free</button>
+        </div>
+        <div class="pcard featured">
+          <div class="pcard-badge">Most popular</div>
+          <h3>Active</h3>
+          <div class="price"><sup>€</sup>9 <sub>/ month</sub></div>
+          <p class="pcard-desc">Turn your map into a weekly rhythm you actually follow.</p>
+          <ul class="pcard-feats">
+            <li>Everything in Free</li>
+            <li>AI weekly activity plan</li>
+            <li>Daily reminders</li>
+            <li>Task check-ins</li>
+            <li>Mood tips (7 dimensions)</li>
+          </ul>
+          <button class="btn-pcard bpc-primary">Start 14-day trial</button>
+        </div>
+        <div class="pcard">
+          <h3>Explorer</h3>
+          <div class="price"><sup>€</sup>15 <sub>/ month</sub></div>
+          <p class="pcard-desc">Add fresh ideas and local discovery to your plan.</p>
+          <ul class="pcard-feats">
+            <li>Everything in Active</li>
+            <li>Location-based suggestions</li>
+            <li>Category filters</li>
+            <li>Challenge mode</li>
+            <li>Partner wellness links</li>
+          </ul>
+          <button class="btn-pcard bpc-outline">Start 14-day trial</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TESTIMONIALS -->
+  <div class="sec">
+    <div class="eyebrow">Real people</div>
+    <h2>What people say <em>after a month</em></h2>
+    <div class="tgrid" style="margin-top:2rem">
+      <div class="tcard"><div class="tstars">★★★★★</div><blockquote>"I printed my life map and put it on the fridge. Every morning I look at it and remember who I want to be this week."</blockquote><div class="tname">Marie-Claire, 67</div><div class="tsub">Retired teacher, Lyon</div></div>
+      <div class="tcard"><div class="tstars">★★★★★</div><blockquote>"I was skeptical — I'm not someone who does apps. But the questionnaire felt like talking to someone who actually listened."</blockquote><div class="tname">Robert, 72</div><div class="tsub">Former engineer, Brussels</div></div>
+      <div class="tcard"><div class="tstars">★★★★★</div><blockquote>"The weekly plan sounds simple but it changed everything. I now have three new things I do regularly that I love."</blockquote><div class="tname">Sylvie, 64</div><div class="tsub">Retired nurse, Geneva</div></div>
+    </div>
+  </div>
+
+  <!-- FAQ -->
+  <div class="sec-full" id="faq">
+    <div class="sec-inner">
+      <div class="eyebrow">FAQ</div>
+      <h2>Common <em>questions</em></h2>
+      <div class="faq" style="margin-top:2rem">
+        <div class="faq-item"><button class="faq-q" onclick="toggleFaq(this)">Do I need to be tech-savvy? <span class="faq-arrow">▼</span></button><div class="faq-a"><p>Not at all. If you can use email, you can use Vivelo. Large text, plain language, no jargon — designed with this specific audience in mind.</p></div></div>
+        <div class="faq-item"><button class="faq-q" onclick="toggleFaq(this)">How long does the questionnaire take? <span class="faq-arrow">▼</span></button><div class="faq-a"><p>About 3–5 minutes for the core version. You can always return and add more detail — your map grows with you over time.</p></div></div>
+        <div class="faq-item"><button class="faq-q" onclick="toggleFaq(this)">Can I cancel anytime? <span class="faq-arrow">▼</span></button><div class="faq-a"><p>Yes. Cancel from your account settings — no forms, no calls, no waiting. Your free life map stays accessible forever.</p></div></div>
+        <div class="faq-item"><button class="faq-q" onclick="toggleFaq(this)">What happens to my personal data? <span class="faq-arrow">▼</span></button><div class="faq-a"><p>Your data is yours. We never sell it. Your life map and answers are stored securely and used only to personalise your experience.</p></div></div>
+        <div class="faq-item"><button class="faq-q" onclick="toggleFaq(this)">Is there a mobile app? <span class="faq-arrow">▼</span></button><div class="faq-a"><p>The website works on any phone or tablet right now. A dedicated app is on the roadmap — sign up and we'll notify you when it's ready.</p></div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CTA BAND -->
+  <div class="cta-band">
+    <h2>Ready to see <em>your map?</em></h2>
+    <p>Takes 3 minutes. Free to start. No credit card needed.</p>
+    <div class="hero-btns">
+      <button class="btn-primary-inv" onclick="showPage('quiz')">Build my life map</button>
+      <button class="btn-outline-inv" onclick="document.getElementById('demo-anchor').scrollIntoView({behavior:'smooth'})">See demo first</button>
+    </div>
+  </div>
+
+  <!-- FOOTER -->
+  <footer>
+    <div>
+      <span class="footer-logo">Vive<span>lo</span></span>
+      <p class="tagline">Helping retirees live actively, stay curious, and stay connected — one week at a time.</p>
+    </div>
+    <div>
+      <h4>Product</h4>
+      <ul>
+        <li><a href="#">How it works</a></li>
+        <li><a href="#">Features</a></li>
+        <li><a href="#">Pricing</a></li>
+        <li><a href="#">Demo</a></li>
+      </ul>
+    </div>
+    <div>
+      <h4>Company</h4>
+      <ul>
+        <li><a href="#">About</a></li>
+        <li><a href="#">Contact</a></li>
+        <li><a href="#">Blog</a></li>
+      </ul>
+    </div>
+    <div>
+      <h4>Legal</h4>
+      <ul>
+        <li><a href="#">Privacy policy</a></li>
+        <li><a href="#">Terms of use</a></li>
+        <li><a href="#">Cookie settings</a></li>
+      </ul>
+    </div>
+  </footer>
+  <div class="footer-bar">© 2025 Vivelo. All rights reserved.</div>
+</div>
+
+
+<!-- ══════════════════════════════════════
+     QUESTIONNAIRE PAGE
+══════════════════════════════════════ -->
+<div id="page-quiz" class="page-section">
+  <div class="quiz-page">
+    <div class="eyebrow">Step <span id="stepLabel">1</span> of 4</div>
+    <h2>Build your <em>life map</em></h2>
+    <p class="sec-sub">Answer honestly — there are no wrong answers. This is your picture, not an evaluation.</p>
+    <div class="q-progress"><div class="q-bar" id="qBar" style="width:25%"></div></div>
+
+    <!-- Q1 -->
+    <div id="qStep1">
+      <div class="q-block">
+        <label>What are you good at? Pick all that resonate.</label>
+        <div class="q-chips" id="strengthChips">
+          <span class="chip" onclick="toggleChip(this)">Listening</span>
+          <span class="chip" onclick="toggleChip(this)">Organising</span>
+          <span class="chip" onclick="toggleChip(this)">Teaching</span>
+          <span class="chip" onclick="toggleChip(this)">Creating things</span>
+          <span class="chip" onclick="toggleChip(this)">Physical activity</span>
+          <span class="chip" onclick="toggleChip(this)">Cooking</span>
+          <span class="chip" onclick="toggleChip(this)">Problem solving</span>
+          <span class="chip" onclick="toggleChip(this)">Storytelling</span>
+          <span class="chip" onclick="toggleChip(this)">Gardening</span>
+          <span class="chip" onclick="toggleChip(this)">Music</span>
+          <span class="chip" onclick="toggleChip(this)">Languages</span>
+          <span class="chip" onclick="toggleChip(this)">Technology</span>
+        </div>
+      </div>
+      <div class="q-block">
+        <label>Anything else you'd add?</label>
+        <input type="text" id="strengthOther" placeholder="e.g. woodworking, knitting, photography…"/>
+      </div>
+      <div class="q-nav">
+        <span class="q-step-label">Strengths</span>
+        <button class="btn-primary" onclick="goStep(2)">Next →</button>
+      </div>
+    </div>
+
+    <!-- Q2 -->
+    <div id="qStep2" style="display:none">
+      <div class="q-block">
+        <label>What do you wish you had more time for?</label>
+        <div class="q-chips" id="wishChips">
+          <span class="chip" onclick="toggleChip(this)">Travel</span>
+          <span class="chip" onclick="toggleChip(this)">Family time</span>
+          <span class="chip" onclick="toggleChip(this)">Learning new things</span>
+          <span class="chip" onclick="toggleChip(this)">Creative projects</span>
+          <span class="chip" onclick="toggleChip(this)">Physical exercise</span>
+          <span class="chip" onclick="toggleChip(this)">Volunteering</span>
+          <span class="chip" onclick="toggleChip(this)">Meeting new people</span>
+          <span class="chip" onclick="toggleChip(this)">Reading</span>
+          <span class="chip" onclick="toggleChip(this)">Outdoor activities</span>
+          <span class="chip" onclick="toggleChip(this)">Spirituality</span>
+          <span class="chip" onclick="toggleChip(this)">Writing</span>
+          <span class="chip" onclick="toggleChip(this)">Arts & culture</span>
+        </div>
+      </div>
+      <div class="q-block">
+        <label>Describe your ideal week in a few words.</label>
+        <textarea id="idealWeek" placeholder="e.g. morning walks, time with grandchildren, learning Italian, occasional trips…"></textarea>
+      </div>
+      <div class="q-nav">
+        <button class="btn-outline" onclick="goStep(1)">← Back</button>
+        <button class="btn-primary" onclick="goStep(3)">Next →</button>
+      </div>
+    </div>
+
+    <!-- Q3 -->
+    <div id="qStep3" style="display:none">
+      <div class="q-block">
+        <label>How would you describe your social life right now?</label>
+        <div class="quiz-opts" style="margin-top:.5rem">
+          <button class="qopt" onclick="selectSingle(this,'social','isolated')">I feel quite isolated and want to change that</button>
+          <button class="qopt" onclick="selectSingle(this,'social','some')">I have some connections but want more depth or variety</button>
+          <button class="qopt" onclick="selectSingle(this,'social','good')">My social life is good and I want to maintain it</button>
+          <button class="qopt" onclick="selectSingle(this,'social','rich')">I have a very rich social life</button>
+        </div>
+      </div>
+      <div class="q-block" style="margin-top:1.5rem">
+        <label>What gives you a sense of purpose today?</label>
+        <textarea id="purposeText" placeholder="e.g. being there for family, a hobby I care about, contributing to my community…"></textarea>
+      </div>
+      <div class="q-nav">
+        <button class="btn-outline" onclick="goStep(2)">← Back</button>
+        <button class="btn-primary" onclick="goStep(4)">Next →</button>
+      </div>
+    </div>
+
+    <!-- Q4 -->
+    <div id="qStep4" style="display:none">
+      <div class="q-block">
+        <label>How active are you physically?</label>
+        <div class="quiz-opts" style="margin-top:.5rem">
+          <button class="qopt" onclick="selectSingle(this,'activity','low')">Not very — I'd like to move more</button>
+          <button class="qopt" onclick="selectSingle(this,'activity','moderate')">Moderately — a few times a week</button>
+          <button class="qopt" onclick="selectSingle(this,'activity','active')">Quite active — daily movement</button>
+          <button class="qopt" onclick="selectSingle(this,'activity','very')">Very active — sport or exercise is a big part of my life</button>
+        </div>
+      </div>
+      <div class="q-block" style="margin-top:1.5rem">
+        <label>One thing you've always wanted to try but never did:</label>
+        <input type="text" id="bucket" placeholder="e.g. learning to paint, hiking the Camino, joining a choir…"/>
+      </div>
+      <div class="q-nav">
+        <button class="btn-outline" onclick="goStep(3)">← Back</button>
+        <button class="btn-primary" onclick="showPage('result')">See my life map →</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════
+     RESULT PAGE
+══════════════════════════════════════ -->
+<div id="page-result" class="page-section">
+  <div class="result-page">
+    <div class="eyebrow">Your life map</div>
+    <h2>Here's where <em>you are today</em></h2>
+    <p class="sec-sub" style="margin:0 auto 1rem;text-align:center">Based on your answers, here's your personalised picture across the four pillars. This is your starting point — not a verdict.</p>
+    <canvas id="resultCanvas" width="720" height="580"></canvas>
+    <div class="result-actions">
+      <button class="btn-primary" onclick="window.print()">🖨 Print my map</button>
+      <button class="btn-outline" onclick="showPage('quiz')">Refine my answers</button>
+      <button class="btn-primary" onclick="showPage('home')">Explore plans →</button>
+    </div>
+    <p style="font-size:.82rem;color:var(--body);margin-top:1.5rem">Create a free account to save your map, get a weekly plan, and track your progress over time.</p>
+    <button class="btn-primary" style="margin-top:.8rem">Save & get my weekly plan</button>
+  </div>
+</div>
+
+
+<script>
+// ════════════════════════════════════
+//  PAGE ROUTING
+// ════════════════════════════════════
+function showPage(id){
+  document.querySelectorAll('.page-section').forEach(s=>s.classList.remove('active'));
+  document.getElementById('page-'+id).classList.add('active');
+  window.scrollTo(0,0);
+  if(id==='result') setTimeout(drawResultMap,100);
+}
+
+// ════════════════════════════════════
+//  QUIZ STATE
+// ════════════════════════════════════
+const state={strengths:[],wishes:[],social:'',activity:''};
+
+function toggleChip(el){el.classList.toggle('on')}
+
+function selectSingle(el,key,val){
+  const group=el.closest('.quiz-opts').querySelectorAll('.qopt');
+  group.forEach(b=>b.classList.remove('sel'));
+  el.classList.add('sel');
+  state[key]=val;
+}
+
+function goStep(n){
+  [1,2,3,4].forEach(i=>{
+    const el=document.getElementById('qStep'+i);
+    if(el) el.style.display=i===n?'block':'none';
+  });
+  document.getElementById('qBar').style.width=(n/4*100)+'%';
+  document.getElementById('stepLabel').textContent=n;
+}
+
+// ════════════════════════════════════
+//  HERO CANVAS — animated life map
+// ════════════════════════════════════
+const hc=document.getElementById('heroCanvas');
+const hx=hc.getContext('2d');
+hc.width=500;hc.height=440;
+const heroPillars=[
+  {lbl:'Purpose',x:160,y:155,r:72,col:'#C49A2E',lcol:'#FEF3D0',items:['Travel','Writing','Mentoring']},
+  {lbl:'Connections',x:330,y:155,r:72,col:'#3A7FC1',lcol:'#E3EEF9',items:['Family','Book club','Community']},
+  {lbl:'Mind',x:160,y:300,r:72,col:'#7B4FBB',lcol:'#F0E8FA',items:['Languages','History','Puzzles']},
+  {lbl:'Body',x:330,y:300,r:72,col:'#3D6B5E',lcol:'#EAF2EF',items:['Walking','Yoga','Cooking']},
+];
+const heroSmall=[
+  {lbl:'Photography',x:72,y:72,r:27,col:'#C49A2E'},
+  {lbl:'Grandkids',x:430,y:68,r:29,col:'#3A7FC1'},
+  {lbl:'Piano',x:66,y:360,r:25,col:'#7B4FBB'},
+  {lbl:'Gardening',x:434,y:364,r:28,col:'#3D6B5E'},
+  {lbl:'Travel',x:247,y:50,r:23,col:'#C49A2E'},
+];
+let ht=0;
+function drawHero(){
+  hx.clearRect(0,0,500,440);
+  // connector lines
+  hx.setLineDash([4,6]);hx.strokeStyle='#D8E4E0';hx.lineWidth=1;
+  [[0,1],[0,2],[1,3],[2,3],[0,3],[1,2]].forEach(([a,b])=>{
+    hx.beginPath();hx.moveTo(heroPillars[a].x,heroPillars[a].y);hx.lineTo(heroPillars[b].x,heroPillars[b].y);hx.stroke();
+  });
+  hx.setLineDash([]);
+  heroPillars.forEach((p,i)=>{
+    const pulse=Math.sin(ht*0.035+i*1.1)*2.5;
+    hx.beginPath();hx.arc(p.x,p.y,p.r+pulse,0,Math.PI*2);
+    hx.fillStyle=p.lcol;hx.fill();
+    hx.strokeStyle=p.col;hx.lineWidth=2;hx.stroke();
+    hx.fillStyle=p.col;hx.font='bold 13px Inter,sans-serif';hx.textAlign='center';
+    hx.fillText(p.lbl,p.x,p.y-10);
+    hx.font='10.5px Inter,sans-serif';hx.fillStyle='#4A524D';
+    p.items.forEach((it,j)=>hx.fillText(it,p.x,p.y+6+j*13));
+  });
+  heroSmall.forEach(b=>{
+    hx.beginPath();hx.arc(b.x,b.y,b.r,0,Math.PI*2);
+    hx.fillStyle=b.col+'25';hx.fill();
+    hx.strokeStyle=b.col;hx.lineWidth=1.5;hx.stroke();
+    hx.fillStyle=b.col;hx.font='9.5px Inter,sans-serif';hx.textAlign='center';
+    hx.fillText(b.lbl,b.x,b.y+3.5);
+  });
+  ht++;requestAnimationFrame(drawHero);
+}
+drawHero();
+
+// ════════════════════════════════════
+//  DEMO MINI MAP
+// ════════════════════════════════════
+function runDemo(btn,focus){
+  document.querySelectorAll('.qopt').forEach(b=>b.classList.remove('sel'));
+  btn.classList.add('sel');
+  setTimeout(()=>{
+    document.getElementById('demoQ').style.display='none';
+    document.getElementById('miniWrap').style.display='block';
+    drawMiniMap(focus);
+  },350);
+}
+function resetDemo(){
+  document.getElementById('demoQ').style.display='block';
+  document.getElementById('miniWrap').style.display='none';
+  document.querySelectorAll('#demoQ .qopt').forEach(b=>b.classList.remove('sel'));
+}
+function drawMiniMap(focus){
+  const mc=document.getElementById('miniCanvas');
+  const mx=mc.getContext('2d');
+  mc.width=400;mc.height=320;
+  const ps=[
+    {k:'purpose',lbl:'Purpose',x:130,y:120,col:'#C49A2E',lcol:'#FEF3D0'},
+    {k:'connect',lbl:'Connections',x:275,y:120,col:'#3A7FC1',lcol:'#E3EEF9'},
+    {k:'mind',lbl:'Mind',x:130,y:230,col:'#7B4FBB',lcol:'#F0E8FA'},
+    {k:'body',lbl:'Body',x:275,y:230,col:'#3D6B5E',lcol:'#EAF2EF'},
+  ];
+  mx.clearRect(0,0,400,320);
+  ps.forEach(p=>{
+    const r=p.k===focus?68:44;
+    mx.beginPath();mx.arc(p.x,p.y,r,0,Math.PI*2);
+    mx.fillStyle=p.lcol;mx.fill();
+    mx.strokeStyle=p.col;mx.lineWidth=p.k===focus?3:1.5;mx.stroke();
+    mx.fillStyle=p.col;
+    mx.font=(p.k===focus?'bold ':'')+'13px Inter,sans-serif';
+    mx.textAlign='center';mx.fillText(p.lbl,p.x,p.y+5);
+  });
+}
+
+// ════════════════════════════════════
+//  RESULT MAP (full)
+// ════════════════════════════════════
+function drawResultMap(){
+  const rc=document.getElementById('resultCanvas');
+  const rx=rc.getContext('2d');
+  rc.width=720;rc.height=580;
+  const ps=[
+    {lbl:'Purpose',x:210,y:190,r:95,col:'#C49A2E',lcol:'#FEF3D0',items:['Travel','Writing','Mentoring','Teaching']},
+    {lbl:'Connections',x:510,y:190,r:95,col:'#3A7FC1',lcol:'#E3EEF9',items:['Family','Book club','Community','Old friends']},
+    {lbl:'Mind',x:210,y:400,r:95,col:'#7B4FBB',lcol:'#F0E8FA',items:['Languages','History','Puzzles','Podcasts']},
+    {lbl:'Body',x:510,y:400,r:95,col:'#3D6B5E',lcol:'#EAF2EF',items:['Walking','Yoga','Cooking','Cycling']},
+  ];
+  const smalls=[
+    {lbl:'Photography',x:80,y:90,r:34,col:'#C49A2E'},
+    {lbl:'Grandkids',x:640,y:85,r:36,col:'#3A7FC1'},
+    {lbl:'Piano',x:72,y:468,r:31,col:'#7B4FBB'},
+    {lbl:'Gardening',x:644,y:476,r:34,col:'#3D6B5E'},
+    {lbl:'Travel',x:360,y:55,r:30,col:'#C49A2E'},
+    {lbl:'Reading',x:360,y:535,r:28,col:'#7B4FBB'},
+  ];
+  // title
+  rx.fillStyle='#1A1F1C';rx.font='bold 16px Inter,sans-serif';rx.textAlign='center';
+  rx.fillText('Your life map — created today',360,28);
+  // connectors
+  rx.setLineDash([5,7]);rx.strokeStyle='#D8E4E0';rx.lineWidth=1.2;
+  [[0,1],[0,2],[1,3],[2,3],[0,3],[1,2]].forEach(([a,b])=>{
+    rx.beginPath();rx.moveTo(ps[a].x,ps[a].y);rx.lineTo(ps[b].x,ps[b].y);rx.stroke();
+  });
+  rx.setLineDash([]);
+  ps.forEach(p=>{
+    rx.beginPath();rx.arc(p.x,p.y,p.r,0,Math.PI*2);
+    rx.fillStyle=p.lcol;rx.fill();
+    rx.strokeStyle=p.col;rx.lineWidth=2.5;rx.stroke();
+    rx.fillStyle=p.col;rx.font='bold 14px Inter,sans-serif';rx.textAlign='center';
+    rx.fillText(p.lbl,p.x,p.y-12);
+    rx.font='11px Inter,sans-serif';rx.fillStyle='#4A524D';
+    p.items.forEach((it,i)=>rx.fillText(it,p.x,p.y+4+i*14));
+  });
+  smalls.forEach(b=>{
+    rx.beginPath();rx.arc(b.x,b.y,b.r,0,Math.PI*2);
+    rx.fillStyle=b.col+'22';rx.fill();
+    rx.strokeStyle=b.col;rx.lineWidth=1.8;rx.stroke();
+    rx.fillStyle=b.col;rx.font='10px Inter,sans-serif';rx.textAlign='center';
+    rx.fillText(b.lbl,b.x,b.y+4);
+  });
+  // watermark
+  rx.fillStyle='rgba(61,107,94,.12)';rx.font='bold 13px Fraunces,serif';rx.textAlign='right';
+  rx.fillText('Vivelo',710,568);
+}
+
+// ════════════════════════════════════
+//  FAQ
+// ════════════════════════════════════
+function toggleFaq(btn){
+  const a=btn.nextElementSibling;
+  const arrow=btn.querySelector('.faq-arrow');
+  const isOpen=a.classList.contains('open');
+  document.querySelectorAll('.faq-a').forEach(el=>el.classList.remove('open'));
+  document.querySelectorAll('.faq-arrow').forEach(el=>el.classList.remove('open'));
+  if(!isOpen){a.classList.add('open');arrow.classList.add('open');}
+}
+</script>
+</body>
+</html>
