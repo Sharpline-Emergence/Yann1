@@ -157,6 +157,11 @@ a { color: var(--sage); }
 }
 
 /* Interest chips */
+.chip-instruction {
+  font-size: 14px;
+  opacity: 0.8;
+  margin-top: 14px;
+}
 .chip-row { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 12px; }
 .chip {
   min-height: 42px;

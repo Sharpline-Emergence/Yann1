@@ -58,11 +58,12 @@
     block.style.color = p.color;
     block.innerHTML = `
       <div class="pillar-name">${p.label}</div>
-      <div class="score-readout">Where you are today: <strong class="score-val">5</strong> / 10 — tap a number below</div>
+      <div class="score-readout">Where you are today: <strong class="score-val">5</strong> / 10 — tap a number below (5 is already picked for you)</div>
       <div class="score-buttons" data-pillar-scores="${p.key}">
         ${Array.from({length: 10}, (_, i) => i + 1).map(n => `<button type="button" class="score-btn${n === 5 ? ' selected' : ''}" data-score="${n}">${n}</button>`).join('')}
       </div>
-      <div class="chip-row" data-pillar-chips="${p.key}" style="margin-top:16px;">
+      <div class="chip-instruction">Tap any that interest you — pick as many or as few as you like.</div>
+      <div class="chip-row" data-pillar-chips="${p.key}" style="margin-top:8px;">
         ${p.chips.map(c => `<span class="chip" data-chip="${c}">${c}</span>`).join('')}
       </div>
       <div class="custom-interest-row">
