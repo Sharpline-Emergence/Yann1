@@ -193,7 +193,34 @@ a { color: var(--sage); }
 .pillar-card .pillar-score { font-size: 32px; font-family: 'Fraunces', serif; }
 .pillar-card .pillar-label { font-size: 13px; font-weight: 600; opacity: 0.85; }
 
-/* AI assistant panel */
+.custom-interest-row {
+  display: flex;
+  gap: 8px;
+  margin-top: 12px;
+}
+.custom-interest-input {
+  flex: 1;
+  min-height: 42px;
+  padding: 9px 14px;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  background: var(--white);
+  font-family: 'Inter', sans-serif;
+  font-size: 15px;
+}
+.custom-interest-add {
+  min-height: 42px;
+  padding: 0 18px;
+  border-radius: 999px;
+  border: none;
+  background: var(--white);
+  border: 1px solid var(--line);
+  font-family: 'Inter', sans-serif;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  touch-action: manipulation;
+}
 .assistant-panel {
   background: var(--white);
   border: 1px solid var(--line);

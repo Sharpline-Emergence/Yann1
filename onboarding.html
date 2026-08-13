@@ -65,10 +65,39 @@
       <div class="chip-row" data-pillar-chips="${p.key}" style="margin-top:16px;">
         ${p.chips.map(c => `<span class="chip" data-chip="${c}">${c}</span>`).join('')}
       </div>
+      <div class="custom-interest-row">
+        <input type="text" class="custom-interest-input" placeholder="Add your own — e.g. Gardening">
+        <button type="button" class="custom-interest-add">Add</button>
+      </div>
     `;
     container.appendChild(block);
 
     const readout = block.querySelector('.score-val');
+    const chipRow = block.querySelector('.chip-row');
+    const customInput = block.querySelector('.custom-interest-input');
+    const customAddBtn = block.querySelector('.custom-interest-add');
+
+    function addCustomChip(label) {
+      const trimmed = label.trim();
+      if (!trimmed || state[p.key].interests.has(trimmed)) return;
+      const chip = document.createElement('span');
+      chip.className = 'chip active';
+      chip.dataset.chip = trimmed;
+      chip.textContent = trimmed;
+      chip.style.background = p.color;
+      chip.addEventListener('click', () => {
+        chip.remove();
+        state[p.key].interests.delete(trimmed);
+      });
+      chipRow.appendChild(chip);
+      state[p.key].interests.add(trimmed);
+      customInput.value = '';
+    }
+
+    customAddBtn.addEventListener('click', () => addCustomChip(customInput.value));
+    customInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') { e.preventDefault(); addCustomChip(customInput.value); }
+    });
     block.querySelectorAll('.score-btn').forEach(btn => {
       btn.style.borderColor = p.color;
       btn.style.color = p.color;
