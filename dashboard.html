@@ -66,11 +66,10 @@
       if (!meta) return;
       const card = document.createElement('div');
       card.className = 'pillar-card';
-      card.style.background = meta.bg;
-      card.style.color = meta.color;
+      card.style.background = meta.color;
       card.innerHTML = `
         <div class="pillar-label">${meta.label}</div>
-        <div class="pillar-score">${row.score}<span style="font-size:16px;opacity:.6;"> / 10</span></div>
+        <div class="pillar-score">${row.score}<span> / 10</span></div>
       `;
       grid.appendChild(card);
     });
