@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sign in — Vivelo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@500;600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<div class="wrap">
+  <div class="center" style="margin-bottom:32px;">
+    <h1 class="display">Vivelo</h1>
+    <p class="helper-text">Sign in to build your life map</p>
+  </div>
+
+  <div class="card">
+    <div id="form-state">
+      <div class="field">
+        <label for="email">Email address</label>
+        <input type="email" id="email" placeholder="you@example.com" autocomplete="email" required>
+      </div>
+      <button class="btn btn-primary" id="send-link-btn">Send me a sign-in link</button>
+      <p class="helper-text">No password to create or remember. We'll send a link straight to your email — just open the email and tap the link, and you're signed in automatically. It's completely safe, and only works from the email address you enter here.</p>
+    </div>
+
+    <div id="sent-state" style="display:none;" class="center">
+      <p style="font-size:17px;">Check your inbox — we sent a sign-in link to <strong id="sent-email"></strong>.</p>
+      <p class="helper-text">Open the email and tap the button inside it. That's it — no password, no code to type. It'll bring you right back here, already signed in.</p>
+    </div>
+
+    <p class="msg" id="msg"></p>
+  </div>
+</div>
+
+<script type="module">
+  import { sendMagicLink } from './js/auth.js';
+
+  const btn = document.getElementById('send-link-btn');
+  const emailInput = document.getElementById('email');
+  const msg = document.getElementById('msg');
+
+  btn.addEventListener('click', async () => {
+    const email = emailInput.value.trim();
+    if (!email) {
+      msg.textContent = 'Enter your email first.';
+      msg.className = 'msg error';
+      return;
+    }
+    btn.disabled = true;
+    btn.textContent = 'Sending…';
+    msg.textContent = '';
+
+    const { error } = await sendMagicLink(email);
+
+    if (error) {
+      msg.textContent = error.message;
+      msg.className = 'msg error';
+      btn.disabled = false;
+      btn.textContent = 'Send me a sign-in link';
+      return;
+    }
+
+    document.getElementById('sent-email').textContent = email;
+    document.getElementById('form-state').style.display = 'none';
+    document.getElementById('sent-state').style.display = 'block';
+  });
+
+  emailInput.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') btn.click();
+  });
+</script>
+</body>
+</html>

@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Set up your profile — Vivelo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@500;600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<div class="wrap">
+  <h1 class="display">Let's map where you're starting</h1>
+  <p class="helper-text" style="margin-bottom:24px;">A couple of quick questions, then rate where you feel you stand in each pillar today. You can always adjust this later.</p>
+
+  <div class="card" style="margin-bottom:20px;">
+    <div class="field">
+      <label for="age">Age</label>
+      <input type="number" id="age" min="18" max="110" placeholder="65">
+    </div>
+    <div class="field" style="margin-bottom:0;">
+      <label for="sex">Sex</label>
+      <select id="sex">
+        <option value="">Prefer not to say</option>
+        <option value="female">Female</option>
+        <option value="male">Male</option>
+        <option value="other">Other</option>
+      </select>
+    </div>
+  </div>
+
+  <div id="pillars"></div>
+
+  <button class="btn btn-primary mt-24" id="save-btn">Save & see my map</button>
+  <p class="msg" id="msg"></p>
+</div>
+
+<script type="module">
+  import { supabase } from './js/supabase-client.js';
+  import { requireSession } from './js/auth.js';
+
+  const PILLARS = [
+    { key: 'purpose',     label: 'Purpose',     color: '#C49A2E', bg: '#FEF3D0', chips: ['Travel', 'Writing', 'Mentoring', 'Teaching', 'Volunteering'] },
+    { key: 'connections', label: 'Connections', color: '#3A7FC1', bg: '#E3EEF9', chips: ['Family', 'Book club', 'Community', 'Old friends', 'New people'] },
+    { key: 'mind',        label: 'Mind',        color: '#7B4FBB', bg: '#F0E8FA', chips: ['Languages', 'History', 'Puzzles', 'Podcasts', 'Reading'] },
+    { key: 'body',        label: 'Body',        color: '#3D6B5E', bg: '#EAF2EF', chips: ['Walking', 'Yoga', 'Cooking', 'Cycling', 'Strength training'] },
+  ];
+
+  const state = {}; // { purpose: { score: 5, interests: Set() }, ... }
+
+  const container = document.getElementById('pillars');
+  PILLARS.forEach(p => {
+    state[p.key] = { score: 5, interests: new Set() };
+
+    const block = document.createElement('div');
+    block.className = 'pillar-block';
+    block.style.background = p.bg;
+    block.style.color = p.color;
+    block.innerHTML = `
+      <div class="pillar-name">${p.label}</div>
+      <input type="range" min="1" max="10" value="5" data-pillar="${p.key}" class="score-slider">
+      <div class="score-readout">Where you are today: <strong class="score-val">5</strong> / 10</div>
+      <div class="chip-row" data-pillar-chips="${p.key}">
+        ${p.chips.map(c => `<span class="chip" data-chip="${c}">${c}</span>`).join('')}
+      </div>
+    `;
+    container.appendChild(block);
+
+    const slider = block.querySelector('.score-slider');
+    const readout = block.querySelector('.score-val');
+    slider.addEventListener('input', () => {
+      state[p.key].score = Number(slider.value);
+      readout.textContent = slider.value;
+    });
+
+    block.querySelectorAll('.chip').forEach(chip => {
+      chip.addEventListener('click', () => {
+        const label = chip.dataset.chip;
+        chip.classList.toggle('active');
+        if (chip.classList.contains('active')) {
+          chip.style.background = p.color;
+          state[p.key].interests.add(label);
+        } else {
+          chip.style.background = '';
+          state[p.key].interests.delete(label);
+        }
+      });
+    });
+  });
+
+  const msg = document.getElementById('msg');
+  const saveBtn = document.getElementById('save-btn');
+
+  saveBtn.addEventListener('click', async () => {
+    const session = await requireSession();
+    if (!session) return;
+    const userId = session.user.id;
+
+    saveBtn.disabled = true;
+    saveBtn.textContent = 'Saving…';
+    msg.textContent = '';
+
+    const age = document.getElementById('age').value || null;
+    const sex = document.getElementById('sex').value || null;
+
+    const { error: profileError } = await supabase.from('profiles').upsert({
+      id: userId,
+      age: age ? Number(age) : null,
+      sex,
+    });
+
+    if (profileError) {
+      msg.textContent = profileError.message;
+      msg.className = 'msg error';
+      saveBtn.disabled = false;
+      saveBtn.textContent = 'Save & see my map';
+      return;
+    }
+
+    const rows = PILLARS.map(p => ({
+      user_id: userId,
+      pillar: p.key,
+      score: state[p.key].score,
+      interests: Array.from(state[p.key].interests),
+    }));
+
+    const { error: pillarError } = await supabase
+      .from('pillar_scores')
+      .upsert(rows, { onConflict: 'user_id,pillar' });
+
+    if (pillarError) {
+      msg.textContent = pillarError.message;
+      msg.className = 'msg error';
+      saveBtn.disabled = false;
+      saveBtn.textContent = 'Save & see my map';
+      return;
+    }
+
+    window.location.href = 'dashboard.html';
+  });
+
+  // Guard: bounce to login if not signed in
+  requireSession();
+</script>
+</body>
+</html>
