@@ -58,19 +58,33 @@
     block.style.color = p.color;
     block.innerHTML = `
       <div class="pillar-name">${p.label}</div>
-      <input type="range" min="1" max="10" value="5" data-pillar="${p.key}" class="score-slider">
-      <div class="score-readout">Where you are today: <strong class="score-val">5</strong> / 10</div>
-      <div class="chip-row" data-pillar-chips="${p.key}">
+      <div class="score-readout">Where you are today: <strong class="score-val">5</strong> / 10 — tap a number below</div>
+      <div class="score-buttons" data-pillar-scores="${p.key}">
+        ${Array.from({length: 10}, (_, i) => i + 1).map(n => `<button type="button" class="score-btn${n === 5 ? ' selected' : ''}" data-score="${n}">${n}</button>`).join('')}
+      </div>
+      <div class="chip-row" data-pillar-chips="${p.key}" style="margin-top:16px;">
         ${p.chips.map(c => `<span class="chip" data-chip="${c}">${c}</span>`).join('')}
       </div>
     `;
     container.appendChild(block);
 
-    const slider = block.querySelector('.score-slider');
     const readout = block.querySelector('.score-val');
-    slider.addEventListener('input', () => {
-      state[p.key].score = Number(slider.value);
-      readout.textContent = slider.value;
+    block.querySelectorAll('.score-btn').forEach(btn => {
+      btn.style.borderColor = p.color;
+      btn.style.color = p.color;
+      btn.addEventListener('click', () => {
+        block.querySelectorAll('.score-btn').forEach(b => {
+          b.classList.remove('selected');
+          b.style.background = 'transparent';
+          b.style.color = p.color;
+        });
+        btn.classList.add('selected');
+        btn.style.background = p.color;
+        btn.style.color = 'white';
+        const val = Number(btn.dataset.score);
+        state[p.key].score = val;
+        readout.textContent = val;
+      });
     });
 
     block.querySelectorAll('.chip').forEach(chip => {
