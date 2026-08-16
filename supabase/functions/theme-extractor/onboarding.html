@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Let's get to know you — Vivelo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@500;600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+<style>
+  .q-wrap { max-width: 640px; margin: 0 auto; }
+  .q-progress-label { font-size: 13px; color: #777; margin-bottom: 6px; }
+  .q-progress-bar { height: 6px; background: #eee; border-radius: 6px; overflow: hidden; margin-bottom: 32px; }
+  .q-progress-fill { height: 100%; background: #3D6B5E; transition: width 0.3s ease; }
+  .q-question { font-size: 22px; font-family: 'Fraunces', serif; margin-bottom: 16px; }
+  .q-textarea { width: 100%; min-height: 110px; padding: 14px; font-size: 15px; font-family: 'Inter', sans-serif; border: 1.5px solid #ddd; border-radius: 10px; resize: vertical; }
+  .q-textarea:focus { outline: none; border-color: #3D6B5E; }
+  .q-chip-row { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
+  .q-chip { background: #f2f2f2; border: 1.5px solid #ddd; border-radius: 50px; padding: 8px 16px; font-size: 14px; cursor: pointer; transition: all 0.15s; }
+  .q-chip.active { background: #3D6B5E; border-color: #3D6B5E; color: white; }
+  .q-single-row { display: flex; flex-direction: column; gap: 10px; margin-top: 8px; }
+  .q-single-opt { text-align: left; padding: 12px 16px; border: 1.5px solid #ddd; border-radius: 10px; background: white; cursor: pointer; font-size: 15px; font-family: 'Inter', sans-serif; }
+  .q-single-opt.active { border-color: #3D6B5E; background: #EAF2EF; }
+  .q-custom-row { display: flex; gap: 8px; margin-top: 10px; }
+  .q-custom-row input { flex: 1; padding: 8px 12px; border: 1.5px solid #ddd; border-radius: 8px; font-size: 14px; }
+  .q-nav { display: flex; justify-content: space-between; margin-top: 28px; }
+  .q-skip { font-size: 13px; color: #999; background: none; border: none; cursor: pointer; text-decoration: underline; }
+  .q-thinking { text-align: center; padding: 60px 20px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="q-wrap">
+
+    <div id="questionnaire">
+      <p class="q-progress-label" id="progressLabel">Question 1 of 6</p>
+      <div class="q-progress-bar"><div class="q-progress-fill" id="progressFill" style="width:16.6%"></div></div>
+
+      <div id="qBody"></div>
+
+      <div class="q-nav">
+        <div>
+          <button class="btn btn-outline" id="backBtn" style="display:none;">Back</button>
+        </div>
+        <div>
+          <button class="q-skip" id="skipBtn">Skip this one</button>
+          <button class="btn btn-primary" id="nextBtn" style="margin-left:12px;">Next</button>
+        </div>
+      </div>
+      <p class="msg" id="msg"></p>
+    </div>
+
+    <div id="thinking" class="q-thinking" style="display:none;">
+      <h2 class="display">Thinking for a moment…</h2>
+      <p class="helper-text">We're finding the themes in what you shared. This takes about 10 seconds.</p>
+    </div>
+
+  </div>
+</div>
+
+<script type="module">
+  import { supabase } from './js/supabase-client.js';
+  import { requireSession } from './js/auth.js';
+
+  const QUESTIONS = [
+    {
+      id: 'q1', type: 'text',
+      text: "Looking back at your life, what activities have given you the greatest sense of satisfaction?",
+      placeholder: "Take your time — there's no right answer here."
+    },
+    {
+      id: 'q2', type: 'text',
+      text: "What personal strengths do you believe people value most in you?",
+      placeholder: "e.g. being a good listener, staying organized, patience…"
+    },
+    {
+      id: 'q3', type: 'text',
+      text: "What are three things you'd like to experience or achieve in the next five years?",
+      placeholder: "Big or small — whatever comes to mind."
+    },
+    {
+      id: 'q4', type: 'text',
+      text: "How would you ideally spend a free and fulfilling day?",
+      placeholder: "Walk us through it, start to finish."
+    },
+    {
+      id: 'q5', type: 'chips',
+      text: "Which activities do you currently enjoy most?",
+      options: ['Reading', 'Walking', 'Sports', 'Volunteering', 'Travel', 'Arts', 'Music', 'Learning', 'Social events'],
+      allowCustom: true
+    },
+    {
+      id: 'q6', type: 'single',
+      text: "How would you describe your current social life?",
+      options: ['Very active', 'Active enough', 'Could be better', 'Limited', 'Very isolated']
+    },
+  ];
+
+  const answers = {}; // q1..q6
+  let current = 0;
+
+  const qBody = document.getElementById('qBody');
+  const progressLabel = document.getElementById('progressLabel');
+  const progressFill = document.getElementById('progressFill');
+  const backBtn = document.getElementById('backBtn');
+  const nextBtn = document.getElementById('nextBtn');
+  const skipBtn = document.getElementById('skipBtn');
+  const msg = document.getElementById('msg');
+
+  function render() {
+    const q = QUESTIONS[current];
+    progressLabel.textContent = `Question ${current + 1} of ${QUESTIONS.length}`;
+    progressFill.style.width = `${((current + 1) / QUESTIONS.length) * 100}%`;
+    backBtn.style.display = current === 0 ? 'none' : 'inline-block';
+    msg.textContent = '';
+
+    if (q.type === 'text') {
+      qBody.innerHTML = `
+        <div class="q-question">${q.text}</div>
+        <textarea class="q-textarea" id="qInput" placeholder="${q.placeholder}">${answers[q.id] || ''}</textarea>
+      `;
+      document.getElementById('qInput').addEventListener('input', e => {
+        answers[q.id] = e.target.value;
+      });
+    }
+
+    if (q.type === 'chips') {
+      const selected = new Set(answers[q.id] || []);
+      qBody.innerHTML = `
+        <div class="q-question">${q.text}</div>
+        <div class="q-chip-row" id="chipRow">
+          ${q.options.map(o => `<span class="q-chip${selected.has(o) ? ' active' : ''}" data-val="${o}">${o}</span>`).join('')}
+        </div>
+        ${q.allowCustom ? `
+          <div class="q-custom-row">
+            <input type="text" id="customChipInput" placeholder="Add your own…">
+            <button class="btn btn-outline" id="customChipAdd" type="button">Add</button>
+          </div>` : ''}
+      `;
+      const chipRow = document.getElementById('chipRow');
+      function syncAnswer() {
+        answers[q.id] = Array.from(chipRow.querySelectorAll('.q-chip.active')).map(c => c.dataset.val);
+      }
+      chipRow.querySelectorAll('.q-chip').forEach(chip => {
+        chip.addEventListener('click', () => { chip.classList.toggle('active'); syncAnswer(); });
+      });
+      if (q.allowCustom) {
+        const addCustom = () => {
+          const input = document.getElementById('customChipInput');
+          const val = input.value.trim();
+          if (!val) return;
+          const chip = document.createElement('span');
+          chip.className = 'q-chip active';
+          chip.dataset.val = val;
+          chip.textContent = val;
+          chip.addEventListener('click', () => { chip.classList.toggle('active'); syncAnswer(); });
+          chipRow.appendChild(chip);
+          input.value = '';
+          syncAnswer();
+        };
+        document.getElementById('customChipAdd').addEventListener('click', addCustom);
+        document.getElementById('customChipInput').addEventListener('keydown', e => {
+          if (e.key === 'Enter') { e.preventDefault(); addCustom(); }
+        });
+      }
+    }
+
+    if (q.type === 'single') {
+      qBody.innerHTML = `
+        <div class="q-question">${q.text}</div>
+        <div class="q-single-row" id="singleRow">
+          ${q.options.map(o => `<button type="button" class="q-single-opt${answers[q.id] === o ? ' active' : ''}" data-val="${o}">${o}</button>`).join('')}
+        </div>
+      `;
+      document.getElementById('singleRow').querySelectorAll('.q-single-opt').forEach(btn => {
+        btn.addEventListener('click', () => {
+          document.querySelectorAll('.q-single-opt').forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+          answers[q.id] = btn.dataset.val;
+        });
+      });
+    }
+  }
+
+  backBtn.addEventListener('click', () => { current--; render(); });
+  skipBtn.addEventListener('click', () => advance());
+  nextBtn.addEventListener('click', () => advance());
+
+  function advance() {
+    if (current < QUESTIONS.length - 1) {
+      current++;
+      render();
+    } else {
+      submit();
+    }
+  }
+
+  async function submit() {
+    const session = await requireSession();
+    if (!session) return;
+    const userId = session.user.id;
+
+    nextBtn.disabled = true;
+    nextBtn.textContent = 'Saving…';
+
+    const { error: saveError } = await supabase
+      .from('questionnaire_responses')
+      .upsert({ user_id: userId, answers, updated_at: new Date().toISOString() });
+
+    if (saveError) {
+      msg.textContent = saveError.message;
+      msg.className = 'msg error';
+      nextBtn.disabled = false;
+      nextBtn.textContent = 'Next';
+      return;
+    }
+
+    document.getElementById('questionnaire').style.display = 'none';
+    document.getElementById('thinking').style.display = 'block';
+
+    const { data, error: fnError } = await supabase.functions.invoke('theme-extractor', {
+      body: { answers },
+    });
+
+    if (fnError || !data?.themes) {
+      // Extraction failing shouldn't strand the user — save what we can
+      // and let them continue; dashboard can retry extraction later.
+      window.location.href = 'dashboard.html';
+      return;
+    }
+
+    // Replace any previous themes with this fresh extraction.
+    await supabase.from('user_themes').delete().eq('user_id', userId);
+    const rows = data.themes.map(t => ({
+      user_id: userId,
+      label: t.label,
+      pillars: t.pillars,
+      weight: t.weight,
+      rationale: t.rationale || null,
+    }));
+    if (rows.length) await supabase.from('user_themes').insert(rows);
+
+    window.location.href = 'dashboard.html';
+  }
+
+  requireSession().then(async session => {
+    if (!session) return;
+    // Pre-fill from any existing questionnaire answers (refresh/back-nav safe).
+    const { data } = await supabase
+      .from('questionnaire_responses')
+      .select('answers')
+      .eq('user_id', session.user.id)
+      .maybeSingle();
+    if (data?.answers) Object.assign(answers, data.answers);
+    render();
+  });
+</script>
+</body>
+</html>
