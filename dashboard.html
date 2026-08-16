@@ -7,6 +7,24 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@500;600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/style.css">
+<style>
+  /* Interest tags on pillar cards — inline here since they're new;
+     safe to move into css/style.css whenever you do a pass on it. */
+  .pillar-card .interest-tags { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+  .pillar-card .interest-tag {
+    font-size: 12px;
+    padding: 3px 10px;
+    border-radius: 50px;
+    background: rgba(255,255,255,0.25);
+    color: #fff;
+  }
+  .pillar-card .no-interests {
+    font-size: 12px;
+    color: rgba(255,255,255,0.7);
+    margin-top: 10px;
+    font-style: italic;
+  }
+</style>
 </head>
 <body>
 <div class="wrap wide">
@@ -64,17 +82,30 @@
     pillarRows.forEach(row => {
       const meta = PILLAR_META[row.pillar];
       if (!meta) return;
+
+      const interests = row.interests || [];
+      const tagsHtml = interests.length
+        ? `<div class="interest-tags">${interests.map(i => `<span class="interest-tag">${escapeHtml(i)}</span>`).join('')}</div>`
+        : `<div class="no-interests">No activities added yet</div>`;
+
       const card = document.createElement('div');
       card.className = 'pillar-card';
       card.style.background = meta.color;
       card.innerHTML = `
         <div class="pillar-label">${meta.label}</div>
         <div class="pillar-score">${row.score}<span> / 10</span></div>
+        ${tagsHtml}
       `;
       grid.appendChild(card);
     });
 
     await loadSuggestions(userId, pillarRows);
+  }
+
+  function escapeHtml(str) {
+    const div = document.createElement('div');
+    div.textContent = str;
+    return div.innerHTML;
   }
 
   async function loadSuggestions(userId, pillarRows) {

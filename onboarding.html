@@ -47,8 +47,10 @@
   ];
 
   const state = {}; // { purpose: { score: 5, interests: Set() }, ... }
+  const blocks = {}; // pillar key -> { block, readout, chipRow, selectScore, addCustomChip }
 
   const container = document.getElementById('pillars');
+
   PILLARS.forEach(p => {
     state[p.key] = { score: 5, interests: new Set() };
 
@@ -78,43 +80,45 @@
     const customInput = block.querySelector('.custom-interest-input');
     const customAddBtn = block.querySelector('.custom-interest-add');
 
-    function addCustomChip(label) {
+    function addCustomChip(label, alreadyActive) {
       const trimmed = label.trim();
       if (!trimmed || state[p.key].interests.has(trimmed)) return;
       const chip = document.createElement('span');
-      chip.className = 'chip active';
+      chip.className = alreadyActive ? 'chip active' : 'chip';
       chip.dataset.chip = trimmed;
       chip.textContent = trimmed;
-      chip.style.background = p.color;
+      if (alreadyActive) chip.style.background = p.color;
       chip.addEventListener('click', () => {
-        chip.remove();
-        state[p.key].interests.delete(trimmed);
+        const isActive = chip.classList.toggle('active');
+        chip.style.background = isActive ? p.color : '';
+        if (isActive) state[p.key].interests.add(trimmed);
+        else state[p.key].interests.delete(trimmed);
       });
       chipRow.appendChild(chip);
-      state[p.key].interests.add(trimmed);
+      if (alreadyActive) state[p.key].interests.add(trimmed);
       customInput.value = '';
     }
 
-    customAddBtn.addEventListener('click', () => addCustomChip(customInput.value));
+    customAddBtn.addEventListener('click', () => addCustomChip(customInput.value, true));
     customInput.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter') { e.preventDefault(); addCustomChip(customInput.value); }
+      if (e.key === 'Enter') { e.preventDefault(); addCustomChip(customInput.value, true); }
     });
+
+    function selectScore(val) {
+      block.querySelectorAll('.score-btn').forEach(b => {
+        const isMatch = Number(b.dataset.score) === val;
+        b.classList.toggle('selected', isMatch);
+        b.style.background = isMatch ? p.color : 'transparent';
+        b.style.color = isMatch ? 'white' : p.color;
+      });
+      state[p.key].score = val;
+      readout.textContent = val;
+    }
+
     block.querySelectorAll('.score-btn').forEach(btn => {
       btn.style.borderColor = p.color;
       btn.style.color = p.color;
-      btn.addEventListener('click', () => {
-        block.querySelectorAll('.score-btn').forEach(b => {
-          b.classList.remove('selected');
-          b.style.background = 'transparent';
-          b.style.color = p.color;
-        });
-        btn.classList.add('selected');
-        btn.style.background = p.color;
-        btn.style.color = 'white';
-        const val = Number(btn.dataset.score);
-        state[p.key].score = val;
-        readout.textContent = val;
-      });
+      btn.addEventListener('click', () => selectScore(Number(btn.dataset.score)));
     });
 
     block.querySelectorAll('.chip').forEach(chip => {
@@ -130,7 +134,47 @@
         }
       });
     });
+
+    blocks[p.key] = { selectScore, addCustomChip, chipRow };
   });
+
+  // ── Pre-fill from existing Supabase data, if any ──
+  // Fixes: form resetting to blank/default on refresh or back-navigation.
+  async function loadExisting(userId) {
+    const [{ data: profile }, { data: pillarRows }] = await Promise.all([
+      supabase.from('profiles').select('*').eq('id', userId).maybeSingle(),
+      supabase.from('pillar_scores').select('*').eq('user_id', userId),
+    ]);
+
+    if (profile) {
+      if (profile.age != null) document.getElementById('age').value = profile.age;
+      if (profile.sex) document.getElementById('sex').value = profile.sex;
+    }
+
+    if (pillarRows && pillarRows.length) {
+      pillarRows.forEach(row => {
+        const b = blocks[row.pillar];
+        if (!b) return;
+
+        b.selectScore(row.score);
+
+        const existingInterests = new Set(row.interests || []);
+        // Check off any predefined chips that match saved interests by
+        // simulating a click — reuses the existing toggle handler so the
+        // active class, background color, and state Set all stay in sync.
+        b.chipRow.querySelectorAll('.chip').forEach(chip => {
+          if (existingInterests.has(chip.dataset.chip) && !chip.classList.contains('active')) {
+            chip.dispatchEvent(new Event('click'));
+          }
+        });
+        // Add any saved interests that aren't in the predefined chip list as custom chips.
+        const predefinedLabels = new Set(Array.from(b.chipRow.querySelectorAll('.chip')).map(c => c.dataset.chip));
+        existingInterests.forEach(label => {
+          if (!predefinedLabels.has(label)) b.addCustomChip(label, true);
+        });
+      });
+    }
+  }
 
   const msg = document.getElementById('msg');
   const saveBtn = document.getElementById('save-btn');
@@ -183,8 +227,10 @@
     window.location.href = 'dashboard.html';
   });
 
-  // Guard: bounce to login if not signed in
-  requireSession();
+  // Guard: bounce to login if not signed in, then load any existing data.
+  requireSession().then(session => {
+    if (session) loadExisting(session.user.id);
+  });
 </script>
 </body>
 </html>
