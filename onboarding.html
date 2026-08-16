@@ -3,233 +3,256 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Set up your profile — Vivelo</title>
+<title>Let's get to know you — Vivelo</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@500;600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/style.css">
+<style>
+  .q-wrap { max-width: 640px; margin: 0 auto; }
+  .q-progress-label { font-size: 13px; color: #777; margin-bottom: 6px; }
+  .q-progress-bar { height: 6px; background: #eee; border-radius: 6px; overflow: hidden; margin-bottom: 32px; }
+  .q-progress-fill { height: 100%; background: #3D6B5E; transition: width 0.3s ease; }
+  .q-question { font-size: 22px; font-family: 'Fraunces', serif; margin-bottom: 16px; }
+  .q-textarea { width: 100%; min-height: 110px; padding: 14px; font-size: 15px; font-family: 'Inter', sans-serif; border: 1.5px solid #ddd; border-radius: 10px; resize: vertical; }
+  .q-textarea:focus { outline: none; border-color: #3D6B5E; }
+  .q-chip-row { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
+  .q-chip { background: #f2f2f2; border: 1.5px solid #ddd; border-radius: 50px; padding: 8px 16px; font-size: 14px; cursor: pointer; transition: all 0.15s; }
+  .q-chip.active { background: #3D6B5E; border-color: #3D6B5E; color: white; }
+  .q-single-row { display: flex; flex-direction: column; gap: 10px; margin-top: 8px; }
+  .q-single-opt { text-align: left; padding: 12px 16px; border: 1.5px solid #ddd; border-radius: 10px; background: white; cursor: pointer; font-size: 15px; font-family: 'Inter', sans-serif; }
+  .q-single-opt.active { border-color: #3D6B5E; background: #EAF2EF; }
+  .q-custom-row { display: flex; gap: 8px; margin-top: 10px; }
+  .q-custom-row input { flex: 1; padding: 8px 12px; border: 1.5px solid #ddd; border-radius: 8px; font-size: 14px; }
+  .q-nav { display: flex; justify-content: space-between; margin-top: 28px; }
+  .q-skip { font-size: 13px; color: #999; background: none; border: none; cursor: pointer; text-decoration: underline; }
+  .q-thinking { text-align: center; padding: 60px 20px; }
+</style>
 </head>
 <body>
 <div class="wrap">
-  <h1 class="display">Let's map where you're starting</h1>
-  <p class="helper-text" style="margin-bottom:24px;">A couple of quick questions, then rate where you feel you stand in each pillar today. You can always adjust this later.</p>
+  <div class="q-wrap">
 
-  <div class="card" style="margin-bottom:20px;">
-    <div class="field">
-      <label for="age">Age</label>
-      <input type="number" id="age" min="18" max="110" placeholder="65">
+    <div id="questionnaire">
+      <p class="q-progress-label" id="progressLabel">Question 1 of 6</p>
+      <div class="q-progress-bar"><div class="q-progress-fill" id="progressFill" style="width:16.6%"></div></div>
+
+      <div id="qBody"></div>
+
+      <div class="q-nav">
+        <div>
+          <button class="btn btn-outline" id="backBtn" style="display:none;">Back</button>
+        </div>
+        <div>
+          <button class="q-skip" id="skipBtn">Skip this one</button>
+          <button class="btn btn-primary" id="nextBtn" style="margin-left:12px;">Next</button>
+        </div>
+      </div>
+      <p class="msg" id="msg"></p>
     </div>
-    <div class="field" style="margin-bottom:0;">
-      <label for="sex">Sex</label>
-      <select id="sex">
-        <option value="">Prefer not to say</option>
-        <option value="female">Female</option>
-        <option value="male">Male</option>
-        <option value="other">Other</option>
-      </select>
+
+    <div id="thinking" class="q-thinking" style="display:none;">
+      <h2 class="display">Thinking for a moment…</h2>
+      <p class="helper-text">We're finding the themes in what you shared. This takes about 10 seconds.</p>
     </div>
+
   </div>
-
-  <div id="pillars"></div>
-
-  <button class="btn btn-primary mt-24" id="save-btn">Save & see my map</button>
-  <p class="msg" id="msg"></p>
 </div>
 
 <script type="module">
   import { supabase } from './js/supabase-client.js';
   import { requireSession } from './js/auth.js';
 
-  const PILLARS = [
-    { key: 'purpose',     label: 'Purpose',     color: '#C49A2E', bg: '#FEF3D0', chips: ['Travel', 'Writing', 'Mentoring', 'Teaching', 'Volunteering'] },
-    { key: 'connections', label: 'Connections', color: '#3A7FC1', bg: '#E3EEF9', chips: ['Family', 'Book club', 'Community', 'Old friends', 'New people'] },
-    { key: 'mind',        label: 'Mind',        color: '#7B4FBB', bg: '#F0E8FA', chips: ['Languages', 'History', 'Puzzles', 'Podcasts', 'Reading'] },
-    { key: 'body',        label: 'Body',        color: '#3D6B5E', bg: '#EAF2EF', chips: ['Walking', 'Yoga', 'Cooking', 'Cycling', 'Strength training'] },
+  const QUESTIONS = [
+    {
+      id: 'q1', type: 'text',
+      text: "Looking back at your life, what activities have given you the greatest sense of satisfaction?",
+      placeholder: "Take your time — there's no right answer here."
+    },
+    {
+      id: 'q2', type: 'text',
+      text: "What personal strengths do you believe people value most in you?",
+      placeholder: "e.g. being a good listener, staying organized, patience…"
+    },
+    {
+      id: 'q3', type: 'text',
+      text: "What are three things you'd like to experience or achieve in the next five years?",
+      placeholder: "Big or small — whatever comes to mind."
+    },
+    {
+      id: 'q4', type: 'text',
+      text: "How would you ideally spend a free and fulfilling day?",
+      placeholder: "Walk us through it, start to finish."
+    },
+    {
+      id: 'q5', type: 'chips',
+      text: "Which activities do you currently enjoy most?",
+      options: ['Reading', 'Walking', 'Sports', 'Volunteering', 'Travel', 'Arts', 'Music', 'Learning', 'Social events'],
+      allowCustom: true
+    },
+    {
+      id: 'q6', type: 'single',
+      text: "How would you describe your current social life?",
+      options: ['Very active', 'Active enough', 'Could be better', 'Limited', 'Very isolated']
+    },
   ];
 
-  const state = {}; // { purpose: { score: 5, interests: Set() }, ... }
-  const blocks = {}; // pillar key -> { block, readout, chipRow, selectScore, addCustomChip }
+  const answers = {}; // q1..q6
+  let current = 0;
 
-  const container = document.getElementById('pillars');
+  const qBody = document.getElementById('qBody');
+  const progressLabel = document.getElementById('progressLabel');
+  const progressFill = document.getElementById('progressFill');
+  const backBtn = document.getElementById('backBtn');
+  const nextBtn = document.getElementById('nextBtn');
+  const skipBtn = document.getElementById('skipBtn');
+  const msg = document.getElementById('msg');
 
-  PILLARS.forEach(p => {
-    state[p.key] = { score: 5, interests: new Set() };
+  function render() {
+    const q = QUESTIONS[current];
+    progressLabel.textContent = `Question ${current + 1} of ${QUESTIONS.length}`;
+    progressFill.style.width = `${((current + 1) / QUESTIONS.length) * 100}%`;
+    backBtn.style.display = current === 0 ? 'none' : 'inline-block';
+    msg.textContent = '';
 
-    const block = document.createElement('div');
-    block.className = 'pillar-block';
-    block.style.background = p.bg;
-    block.style.color = p.color;
-    block.innerHTML = `
-      <div class="pillar-name">${p.label}</div>
-      <div class="score-readout">Where you are today: <strong class="score-val">5</strong> / 10 — tap a number below (5 is already picked for you)</div>
-      <div class="score-buttons" data-pillar-scores="${p.key}">
-        ${Array.from({length: 10}, (_, i) => i + 1).map(n => `<button type="button" class="score-btn${n === 5 ? ' selected' : ''}" data-score="${n}">${n}</button>`).join('')}
-      </div>
-      <div class="chip-instruction">Tap any that interest you — pick as many or as few as you like.</div>
-      <div class="chip-row" data-pillar-chips="${p.key}" style="margin-top:8px;">
-        ${p.chips.map(c => `<span class="chip" data-chip="${c}">${c}</span>`).join('')}
-      </div>
-      <div class="custom-interest-row">
-        <input type="text" class="custom-interest-input" placeholder="Add your own — e.g. Gardening">
-        <button type="button" class="custom-interest-add">Add</button>
-      </div>
-    `;
-    container.appendChild(block);
-
-    const readout = block.querySelector('.score-val');
-    const chipRow = block.querySelector('.chip-row');
-    const customInput = block.querySelector('.custom-interest-input');
-    const customAddBtn = block.querySelector('.custom-interest-add');
-
-    function addCustomChip(label, alreadyActive) {
-      const trimmed = label.trim();
-      if (!trimmed || state[p.key].interests.has(trimmed)) return;
-      const chip = document.createElement('span');
-      chip.className = alreadyActive ? 'chip active' : 'chip';
-      chip.dataset.chip = trimmed;
-      chip.textContent = trimmed;
-      if (alreadyActive) chip.style.background = p.color;
-      chip.addEventListener('click', () => {
-        const isActive = chip.classList.toggle('active');
-        chip.style.background = isActive ? p.color : '';
-        if (isActive) state[p.key].interests.add(trimmed);
-        else state[p.key].interests.delete(trimmed);
+    if (q.type === 'text') {
+      qBody.innerHTML = `
+        <div class="q-question">${q.text}</div>
+        <textarea class="q-textarea" id="qInput" placeholder="${q.placeholder}">${answers[q.id] || ''}</textarea>
+      `;
+      document.getElementById('qInput').addEventListener('input', e => {
+        answers[q.id] = e.target.value;
       });
-      chipRow.appendChild(chip);
-      if (alreadyActive) state[p.key].interests.add(trimmed);
-      customInput.value = '';
     }
 
-    customAddBtn.addEventListener('click', () => addCustomChip(customInput.value, true));
-    customInput.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter') { e.preventDefault(); addCustomChip(customInput.value, true); }
-    });
-
-    function selectScore(val) {
-      block.querySelectorAll('.score-btn').forEach(b => {
-        const isMatch = Number(b.dataset.score) === val;
-        b.classList.toggle('selected', isMatch);
-        b.style.background = isMatch ? p.color : 'transparent';
-        b.style.color = isMatch ? 'white' : p.color;
+    if (q.type === 'chips') {
+      const selected = new Set(answers[q.id] || []);
+      qBody.innerHTML = `
+        <div class="q-question">${q.text}</div>
+        <div class="q-chip-row" id="chipRow">
+          ${q.options.map(o => `<span class="q-chip${selected.has(o) ? ' active' : ''}" data-val="${o}">${o}</span>`).join('')}
+        </div>
+        ${q.allowCustom ? `
+          <div class="q-custom-row">
+            <input type="text" id="customChipInput" placeholder="Add your own…">
+            <button class="btn btn-outline" id="customChipAdd" type="button">Add</button>
+          </div>` : ''}
+      `;
+      const chipRow = document.getElementById('chipRow');
+      function syncAnswer() {
+        answers[q.id] = Array.from(chipRow.querySelectorAll('.q-chip.active')).map(c => c.dataset.val);
+      }
+      chipRow.querySelectorAll('.q-chip').forEach(chip => {
+        chip.addEventListener('click', () => { chip.classList.toggle('active'); syncAnswer(); });
       });
-      state[p.key].score = val;
-      readout.textContent = val;
-    }
-
-    block.querySelectorAll('.score-btn').forEach(btn => {
-      btn.style.borderColor = p.color;
-      btn.style.color = p.color;
-      btn.addEventListener('click', () => selectScore(Number(btn.dataset.score)));
-    });
-
-    block.querySelectorAll('.chip').forEach(chip => {
-      chip.addEventListener('click', () => {
-        const label = chip.dataset.chip;
-        chip.classList.toggle('active');
-        if (chip.classList.contains('active')) {
-          chip.style.background = p.color;
-          state[p.key].interests.add(label);
-        } else {
-          chip.style.background = '';
-          state[p.key].interests.delete(label);
-        }
-      });
-    });
-
-    blocks[p.key] = { selectScore, addCustomChip, chipRow };
-  });
-
-  // ── Pre-fill from existing Supabase data, if any ──
-  // Fixes: form resetting to blank/default on refresh or back-navigation.
-  async function loadExisting(userId) {
-    const [{ data: profile }, { data: pillarRows }] = await Promise.all([
-      supabase.from('profiles').select('*').eq('id', userId).maybeSingle(),
-      supabase.from('pillar_scores').select('*').eq('user_id', userId),
-    ]);
-
-    if (profile) {
-      if (profile.age != null) document.getElementById('age').value = profile.age;
-      if (profile.sex) document.getElementById('sex').value = profile.sex;
-    }
-
-    if (pillarRows && pillarRows.length) {
-      pillarRows.forEach(row => {
-        const b = blocks[row.pillar];
-        if (!b) return;
-
-        b.selectScore(row.score);
-
-        const existingInterests = new Set(row.interests || []);
-        // Check off any predefined chips that match saved interests by
-        // simulating a click — reuses the existing toggle handler so the
-        // active class, background color, and state Set all stay in sync.
-        b.chipRow.querySelectorAll('.chip').forEach(chip => {
-          if (existingInterests.has(chip.dataset.chip) && !chip.classList.contains('active')) {
-            chip.dispatchEvent(new Event('click'));
-          }
+      if (q.allowCustom) {
+        const addCustom = () => {
+          const input = document.getElementById('customChipInput');
+          const val = input.value.trim();
+          if (!val) return;
+          const chip = document.createElement('span');
+          chip.className = 'q-chip active';
+          chip.dataset.val = val;
+          chip.textContent = val;
+          chip.addEventListener('click', () => { chip.classList.toggle('active'); syncAnswer(); });
+          chipRow.appendChild(chip);
+          input.value = '';
+          syncAnswer();
+        };
+        document.getElementById('customChipAdd').addEventListener('click', addCustom);
+        document.getElementById('customChipInput').addEventListener('keydown', e => {
+          if (e.key === 'Enter') { e.preventDefault(); addCustom(); }
         });
-        // Add any saved interests that aren't in the predefined chip list as custom chips.
-        const predefinedLabels = new Set(Array.from(b.chipRow.querySelectorAll('.chip')).map(c => c.dataset.chip));
-        existingInterests.forEach(label => {
-          if (!predefinedLabels.has(label)) b.addCustomChip(label, true);
+      }
+    }
+
+    if (q.type === 'single') {
+      qBody.innerHTML = `
+        <div class="q-question">${q.text}</div>
+        <div class="q-single-row" id="singleRow">
+          ${q.options.map(o => `<button type="button" class="q-single-opt${answers[q.id] === o ? ' active' : ''}" data-val="${o}">${o}</button>`).join('')}
+        </div>
+      `;
+      document.getElementById('singleRow').querySelectorAll('.q-single-opt').forEach(btn => {
+        btn.addEventListener('click', () => {
+          document.querySelectorAll('.q-single-opt').forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+          answers[q.id] = btn.dataset.val;
         });
       });
     }
   }
 
-  const msg = document.getElementById('msg');
-  const saveBtn = document.getElementById('save-btn');
+  backBtn.addEventListener('click', () => { current--; render(); });
+  skipBtn.addEventListener('click', () => advance());
+  nextBtn.addEventListener('click', () => advance());
 
-  saveBtn.addEventListener('click', async () => {
+  function advance() {
+    if (current < QUESTIONS.length - 1) {
+      current++;
+      render();
+    } else {
+      submit();
+    }
+  }
+
+  async function submit() {
     const session = await requireSession();
     if (!session) return;
     const userId = session.user.id;
 
-    saveBtn.disabled = true;
-    saveBtn.textContent = 'Saving…';
-    msg.textContent = '';
+    nextBtn.disabled = true;
+    nextBtn.textContent = 'Saving…';
 
-    const age = document.getElementById('age').value || null;
-    const sex = document.getElementById('sex').value || null;
+    const { error: saveError } = await supabase
+      .from('questionnaire_responses')
+      .upsert({ user_id: userId, answers, updated_at: new Date().toISOString() });
 
-    const { error: profileError } = await supabase.from('profiles').upsert({
-      id: userId,
-      age: age ? Number(age) : null,
-      sex,
+    if (saveError) {
+      msg.textContent = saveError.message;
+      msg.className = 'msg error';
+      nextBtn.disabled = false;
+      nextBtn.textContent = 'Next';
+      return;
+    }
+
+    document.getElementById('questionnaire').style.display = 'none';
+    document.getElementById('thinking').style.display = 'block';
+
+    const { data, error: fnError } = await supabase.functions.invoke('theme-extractor', {
+      body: { answers },
     });
 
-    if (profileError) {
-      msg.textContent = profileError.message;
-      msg.className = 'msg error';
-      saveBtn.disabled = false;
-      saveBtn.textContent = 'Save & see my map';
+    if (fnError || !data?.themes) {
+      // Extraction failing shouldn't strand the user — save what we can
+      // and let them continue; dashboard can retry extraction later.
+      window.location.href = 'dashboard.html';
       return;
     }
 
-    const rows = PILLARS.map(p => ({
+    // Replace any previous themes with this fresh extraction.
+    await supabase.from('user_themes').delete().eq('user_id', userId);
+    const rows = data.themes.map(t => ({
       user_id: userId,
-      pillar: p.key,
-      score: state[p.key].score,
-      interests: Array.from(state[p.key].interests),
+      label: t.label,
+      pillars: t.pillars,
+      weight: t.weight,
+      rationale: t.rationale || null,
     }));
-
-    const { error: pillarError } = await supabase
-      .from('pillar_scores')
-      .upsert(rows, { onConflict: 'user_id,pillar' });
-
-    if (pillarError) {
-      msg.textContent = pillarError.message;
-      msg.className = 'msg error';
-      saveBtn.disabled = false;
-      saveBtn.textContent = 'Save & see my map';
-      return;
-    }
+    if (rows.length) await supabase.from('user_themes').insert(rows);
 
     window.location.href = 'dashboard.html';
-  });
+  }
 
-  // Guard: bounce to login if not signed in, then load any existing data.
-  requireSession().then(session => {
-    if (session) loadExisting(session.user.id);
+  requireSession().then(async session => {
+    if (!session) return;
+    // Pre-fill from any existing questionnaire answers (refresh/back-nav safe).
+    const { data } = await supabase
+      .from('questionnaire_responses')
+      .select('answers')
+      .eq('user_id', session.user.id)
+      .maybeSingle();
+    if (data?.answers) Object.assign(answers, data.answers);
+    render();
   });
 </script>
 </body>

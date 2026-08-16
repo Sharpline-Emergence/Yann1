@@ -8,22 +8,24 @@
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@500;600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/style.css">
 <style>
-  /* Interest tags on pillar cards — inline here since they're new;
-     safe to move into css/style.css whenever you do a pass on it. */
-  .pillar-card .interest-tags { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
-  .pillar-card .interest-tag {
-    font-size: 12px;
-    padding: 3px 10px;
+  .pillar-section { margin-bottom: 32px; }
+  .pillar-heading { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; }
+  .pillar-dot { width: 14px; height: 14px; border-radius: 50%; display: inline-block; }
+  .pillar-heading h3 { font-family: 'Fraunces', serif; font-size: 20px; margin: 0; }
+  .theme-row { display: flex; flex-wrap: wrap; gap: 10px; }
+  .theme-pill {
+    display: inline-flex;
+    align-items: center;
     border-radius: 50px;
-    background: rgba(255,255,255,0.25);
-    color: #fff;
+    color: white;
+    font-weight: 500;
   }
-  .pillar-card .no-interests {
-    font-size: 12px;
-    color: rgba(255,255,255,0.7);
-    margin-top: 10px;
-    font-style: italic;
-  }
+  /* weight controls size */
+  .theme-pill.w1 { padding: 6px 14px; font-size: 13px; opacity: 0.85; }
+  .theme-pill.w2 { padding: 9px 18px; font-size: 14px; opacity: 0.92; }
+  .theme-pill.w3 { padding: 12px 22px; font-size: 16px; font-weight: 600; }
+  .empty-pillar { font-size: 13px; color: #999; font-style: italic; }
+  .retake-link { font-size: 13px; margin-top: 24px; display: inline-block; }
 </style>
 </head>
 <body>
@@ -34,18 +36,15 @@
   </div>
 
   <h2>Your life map</h2>
-  <p class="helper-text" style="margin-bottom:20px;">Where you stand today across all four pillars.</p>
+  <p class="helper-text" style="margin-bottom:28px;">Themes pulled from what you shared — sized by how strongly they came through.</p>
 
-  <div class="pillar-grid" id="pillar-grid"></div>
+  <div id="pillar-sections"></div>
 
-  <div class="assistant-panel">
-    <span class="ai-badge">AI assistant</span>
-    <h3 style="font-size:17px; margin-bottom:6px;">Suggestions for you</h3>
-    <p class="helper-text" id="assistant-intro">Based on where you're starting, here's where you might explore next.</p>
-    <div id="suggestions"></div>
-    <button class="btn btn-ghost mt-24" id="refresh-btn">Get new suggestions</button>
-    <p class="msg" id="assistant-msg"></p>
-  </div>
+  <p id="empty-state" class="helper-text" style="display:none;">
+    No themes yet — <a href="onboarding.html">answer a few questions</a> to build your map.
+  </p>
+
+  <a class="retake-link" href="onboarding.html">Retake the questionnaire →</a>
 </div>
 
 <script type="module">
@@ -53,10 +52,10 @@
   import { requireSession, signOut } from './js/auth.js';
 
   const PILLAR_META = {
-    purpose:     { label: 'Purpose',     color: '#C49A2E', bg: '#FEF3D0' },
-    connections: { label: 'Connections', color: '#3A7FC1', bg: '#E3EEF9' },
-    mind:        { label: 'Mind',        color: '#7B4FBB', bg: '#F0E8FA' },
-    body:        { label: 'Body',        color: '#3D6B5E', bg: '#EAF2EF' },
+    purpose:     { label: 'Purpose',     color: '#C49A2E' },
+    connections: { label: 'Connections', color: '#3A7FC1' },
+    mind:        { label: 'Mind',        color: '#7B4FBB' },
+    body:        { label: 'Body',        color: '#3D6B5E' },
   };
 
   document.getElementById('signout-btn').addEventListener('click', signOut);
@@ -66,40 +65,57 @@
     if (!session) return;
     const userId = session.user.id;
 
-    const { data: pillarRows, error } = await supabase
-      .from('pillar_scores')
+    const { data: themes, error } = await supabase
+      .from('user_themes')
       .select('*')
       .eq('user_id', userId);
 
-    if (error || !pillarRows || pillarRows.length === 0) {
-      // No profile yet — send them to onboarding
-      window.location.href = 'onboarding.html';
+    if (error || !themes || themes.length === 0) {
+      // No themes yet — either brand new user, or extraction hasn't run.
+      // Check if they at least have questionnaire answers saved before
+      // deciding whether to bounce them to onboarding or just show empty state.
+      const { data: responses } = await supabase
+        .from('questionnaire_responses')
+        .select('user_id')
+        .eq('user_id', userId)
+        .maybeSingle();
+
+      if (!responses) {
+        window.location.href = 'onboarding.html';
+        return;
+      }
+      document.getElementById('empty-state').style.display = 'block';
       return;
     }
 
-    const grid = document.getElementById('pillar-grid');
-    grid.innerHTML = '';
-    pillarRows.forEach(row => {
-      const meta = PILLAR_META[row.pillar];
-      if (!meta) return;
+    renderPillars(themes);
+  }
 
-      const interests = row.interests || [];
-      const tagsHtml = interests.length
-        ? `<div class="interest-tags">${interests.map(i => `<span class="interest-tag">${escapeHtml(i)}</span>`).join('')}</div>`
-        : `<div class="no-interests">No activities added yet</div>`;
+  function renderPillars(themes) {
+    const container = document.getElementById('pillar-sections');
+    container.innerHTML = '';
 
-      const card = document.createElement('div');
-      card.className = 'pillar-card';
-      card.style.background = meta.color;
-      card.innerHTML = `
-        <div class="pillar-label">${meta.label}</div>
-        <div class="pillar-score">${row.score}<span> / 10</span></div>
-        ${tagsHtml}
+    Object.entries(PILLAR_META).forEach(([key, meta]) => {
+      const linkedThemes = themes.filter(t => (t.pillars || []).includes(key));
+
+      const section = document.createElement('div');
+      section.className = 'pillar-section';
+
+      const themesHtml = linkedThemes.length
+        ? `<div class="theme-row">${linkedThemes.map(t => `
+            <span class="theme-pill w${t.weight}" style="background:${meta.color}">${escapeHtml(t.label)}</span>
+          `).join('')}</div>`
+        : `<div class="empty-pillar">Nothing here yet</div>`;
+
+      section.innerHTML = `
+        <div class="pillar-heading">
+          <span class="pillar-dot" style="background:${meta.color}"></span>
+          <h3>${meta.label}</h3>
+        </div>
+        ${themesHtml}
       `;
-      grid.appendChild(card);
+      container.appendChild(section);
     });
-
-    await loadSuggestions(userId, pillarRows);
   }
 
   function escapeHtml(str) {
@@ -107,72 +123,6 @@
     div.textContent = str;
     return div.innerHTML;
   }
-
-  async function loadSuggestions(userId, pillarRows) {
-    const { data: existing } = await supabase
-      .from('ai_suggestions')
-      .select('*')
-      .eq('user_id', userId)
-      .order('created_at', { ascending: false })
-      .limit(4);
-
-    if (existing && existing.length > 0) {
-      renderSuggestions(existing);
-    } else {
-      await fetchNewSuggestions(userId, pillarRows);
-    }
-  }
-
-  function renderSuggestions(suggestions) {
-    const box = document.getElementById('suggestions');
-    box.innerHTML = suggestions.map(s => {
-      const meta = PILLAR_META[s.pillar] || { label: s.pillar, color: '#666' };
-      return `
-        <div class="suggestion">
-          <span class="pillar-tag" style="background:${meta.color}">${meta.label}</span>
-          <div>${s.suggestion}</div>
-        </div>`;
-    }).join('');
-  }
-
-  async function fetchNewSuggestions(userId, pillarRows) {
-    const msg = document.getElementById('assistant-msg');
-    msg.textContent = 'Thinking…';
-    msg.className = 'msg';
-
-    // Calls the pillar-assistant Supabase Edge Function.
-    // See supabase/functions/pillar-assistant/index.ts
-    const { data, error } = await supabase.functions.invoke('pillar-assistant', {
-      body: { pillars: pillarRows },
-    });
-
-    if (error) {
-      msg.textContent = "Couldn't reach the assistant — the Edge Function may not be deployed yet.";
-      msg.className = 'msg error';
-      return;
-    }
-
-    msg.textContent = '';
-    const rows = (data.suggestions || []).map(s => ({
-      user_id: userId,
-      pillar: s.pillar,
-      suggestion: s.suggestion,
-    }));
-    if (rows.length) {
-      await supabase.from('ai_suggestions').insert(rows);
-    }
-    renderSuggestions(rows.length ? rows : (data.suggestions || []));
-  }
-
-  document.getElementById('refresh-btn').addEventListener('click', async () => {
-    const session = await requireSession();
-    if (!session) return;
-    const { data: pillarRows } = await supabase
-      .from('pillar_scores')
-      .select('*')
-      .eq('user_id', session.user.id);
-    await fetchNewSuggestions(session.user.id, pillarRows);
-  });
 
   loadDashboard();
 </script>
