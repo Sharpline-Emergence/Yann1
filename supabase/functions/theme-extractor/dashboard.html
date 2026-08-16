@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Your map — Vivelo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@500;600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+<style>
+  .pillar-section { margin-bottom: 32px; }
+  .pillar-heading { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; }
+  .pillar-dot { width: 14px; height: 14px; border-radius: 50%; display: inline-block; }
+  .pillar-heading h3 { font-family: 'Fraunces', serif; font-size: 20px; margin: 0; }
+  .theme-row { display: flex; flex-wrap: wrap; gap: 10px; }
+  .theme-pill {
+    display: inline-flex;
+    align-items: center;
+    border-radius: 50px;
+    color: white;
+    font-weight: 500;
+  }
+  /* weight controls size */
+  .theme-pill.w1 { padding: 6px 14px; font-size: 13px; opacity: 0.85; }
+  .theme-pill.w2 { padding: 9px 18px; font-size: 14px; opacity: 0.92; }
+  .theme-pill.w3 { padding: 12px 22px; font-size: 16px; font-weight: 600; }
+  .empty-pillar { font-size: 13px; color: #999; font-style: italic; }
+  .retake-link { font-size: 13px; margin-top: 24px; display: inline-block; }
+</style>
+</head>
+<body>
+<div class="wrap wide">
+  <div class="topbar">
+    <div class="brand">Vivelo</div>
+    <button class="signout" id="signout-btn">Sign out</button>
+  </div>
+
+  <h2>Your life map</h2>
+  <p class="helper-text" style="margin-bottom:28px;">Themes pulled from what you shared — sized by how strongly they came through.</p>
+
+  <div id="pillar-sections"></div>
+
+  <p id="empty-state" class="helper-text" style="display:none;">
+    No themes yet — <a href="onboarding.html">answer a few questions</a> to build your map.
+  </p>
+
+  <a class="retake-link" href="onboarding.html">Retake the questionnaire →</a>
+</div>
+
+<script type="module">
+  import { supabase } from './js/supabase-client.js';
+  import { requireSession, signOut } from './js/auth.js';
+
+  const PILLAR_META = {
+    purpose:     { label: 'Purpose',     color: '#C49A2E' },
+    connections: { label: 'Connections', color: '#3A7FC1' },
+    mind:        { label: 'Mind',        color: '#7B4FBB' },
+    body:        { label: 'Body',        color: '#3D6B5E' },
+  };
+
+  document.getElementById('signout-btn').addEventListener('click', signOut);
+
+  async function loadDashboard() {
+    const session = await requireSession();
+    if (!session) return;
+    const userId = session.user.id;
+
+    const { data: themes, error } = await supabase
+      .from('user_themes')
+      .select('*')
+      .eq('user_id', userId);
+
+    if (error || !themes || themes.length === 0) {
+      // No themes yet — either brand new user, or extraction hasn't run.
+      // Check if they at least have questionnaire answers saved before
+      // deciding whether to bounce them to onboarding or just show empty state.
+      const { data: responses } = await supabase
+        .from('questionnaire_responses')
+        .select('user_id')
+        .eq('user_id', userId)
+        .maybeSingle();
+
+      if (!responses) {
+        window.location.href = 'onboarding.html';
+        return;
+      }
+      document.getElementById('empty-state').style.display = 'block';
+      return;
+    }
+
+    renderPillars(themes);
+  }
+
+  function renderPillars(themes) {
+    const container = document.getElementById('pillar-sections');
+    container.innerHTML = '';
+
+    Object.entries(PILLAR_META).forEach(([key, meta]) => {
+      const linkedThemes = themes.filter(t => (t.pillars || []).includes(key));
+
+      const section = document.createElement('div');
+      section.className = 'pillar-section';
+
+      const themesHtml = linkedThemes.length
+        ? `<div class="theme-row">${linkedThemes.map(t => `
+            <span class="theme-pill w${t.weight}" style="background:${meta.color}">${escapeHtml(t.label)}</span>
+          `).join('')}</div>`
+        : `<div class="empty-pillar">Nothing here yet</div>`;
+
+      section.innerHTML = `
+        <div class="pillar-heading">
+          <span class="pillar-dot" style="background:${meta.color}"></span>
+          <h3>${meta.label}</h3>
+        </div>
+        ${themesHtml}
+      `;
+      container.appendChild(section);
+    });
+  }
+
+  function escapeHtml(str) {
+    const div = document.createElement('div');
+    div.textContent = str;
+    return div.innerHTML;
+  }
+
+  loadDashboard();
+</script>
+</body>
+</html>
