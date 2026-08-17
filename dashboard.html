@@ -8,11 +8,14 @@
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@500;600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/style.css">
 <style>
-  .pillar-section { margin-bottom: 32px; }
+  #map-container { position: relative; }
+  #connector-svg { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 0; }
+  .pillar-section { position: relative; z-index: 1; margin-bottom: 32px; }
   .pillar-heading { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; }
   .pillar-dot { width: 14px; height: 14px; border-radius: 50%; display: inline-block; }
   .pillar-heading h3 { font-family: 'Fraunces', serif; font-size: 20px; margin: 0; }
   .theme-row { display: flex; flex-wrap: wrap; gap: 10px; }
+  .theme-item { display: flex; flex-direction: column; align-items: flex-start; }
   .theme-pill {
     display: inline-flex;
     align-items: center;
@@ -24,6 +27,7 @@
   .theme-pill.w1 { padding: 6px 14px; font-size: 13px; opacity: 0.85; }
   .theme-pill.w2 { padding: 9px 18px; font-size: 14px; opacity: 0.92; }
   .theme-pill.w3 { padding: 12px 22px; font-size: 16px; font-weight: 600; }
+  .theme-linked { font-size: 11px; color: #888; margin-top: 3px; padding-left: 4px; }
   .empty-pillar { font-size: 13px; color: #999; font-style: italic; }
   .retake-link { font-size: 13px; margin-top: 24px; display: inline-block; }
 </style>
@@ -36,9 +40,12 @@
   </div>
 
   <h2>Your life map</h2>
-  <p class="helper-text" style="margin-bottom:28px;">Themes pulled from what you shared — sized by how strongly they came through.</p>
+  <p class="helper-text" style="margin-bottom:28px;">Themes pulled from what you shared — sized by how strongly they came through. Lines show pillars that share a theme.</p>
 
-  <div id="pillar-sections"></div>
+  <div id="map-container">
+    <svg id="connector-svg"></svg>
+    <div id="pillar-sections"></div>
+  </div>
 
   <p id="empty-state" class="helper-text" style="display:none;">
     No themes yet — <a href="onboarding.html">answer a few questions</a> to build your map.
@@ -60,6 +67,8 @@
 
   document.getElementById('signout-btn').addEventListener('click', signOut);
 
+  let currentThemes = [];
+
   async function loadDashboard() {
     const session = await requireSession();
     if (!session) return;
@@ -71,9 +80,6 @@
       .eq('user_id', userId);
 
     if (error || !themes || themes.length === 0) {
-      // No themes yet — either brand new user, or extraction hasn't run.
-      // Check if they at least have questionnaire answers saved before
-      // deciding whether to bounce them to onboarding or just show empty state.
       const { data: responses } = await supabase
         .from('questionnaire_responses')
         .select('user_id')
@@ -88,7 +94,9 @@
       return;
     }
 
+    currentThemes = themes;
     renderPillars(themes);
+    drawConnectors(themes);
   }
 
   function renderPillars(themes) {
@@ -100,16 +108,28 @@
 
       const section = document.createElement('div');
       section.className = 'pillar-section';
+      section.dataset.pillar = key;
 
       const themesHtml = linkedThemes.length
-        ? `<div class="theme-row">${linkedThemes.map(t => `
-            <span class="theme-pill w${t.weight}" style="background:${meta.color}">${escapeHtml(t.label)}</span>
-          `).join('')}</div>`
+        ? `<div class="theme-row">${linkedThemes.map(t => {
+            const otherPillars = (t.pillars || [])
+              .filter(p => p !== key)
+              .map(p => PILLAR_META[p]?.label || p);
+            const linkedLabel = otherPillars.length
+              ? `<div class="theme-linked">also in: ${otherPillars.join(', ')}</div>`
+              : '';
+            return `
+              <div class="theme-item">
+                <span class="theme-pill w${t.weight}" style="background:${meta.color}">${escapeHtml(t.label)}</span>
+                ${linkedLabel}
+              </div>
+            `;
+          }).join('')}</div>`
         : `<div class="empty-pillar">Nothing here yet</div>`;
 
       section.innerHTML = `
         <div class="pillar-heading">
-          <span class="pillar-dot" style="background:${meta.color}"></span>
+          <span class="pillar-dot" id="dot-${key}" style="background:${meta.color}"></span>
           <h3>${meta.label}</h3>
         </div>
         ${themesHtml}
@@ -118,11 +138,68 @@
     });
   }
 
+  function drawConnectors(themes) {
+    const svg = document.getElementById('connector-svg');
+    const containerEl = document.getElementById('map-container');
+    svg.innerHTML = '';
+
+    const containerRect = containerEl.getBoundingClientRect();
+    svg.setAttribute('width', containerRect.width);
+    svg.setAttribute('height', containerRect.height);
+
+    const pillarKeys = Object.keys(PILLAR_META);
+
+    // Count shared themes between every pair of pillars.
+    const pairCounts = {};
+    themes.forEach(t => {
+      const pillars = (t.pillars || []).filter(p => pillarKeys.includes(p));
+      for (let i = 0; i < pillars.length; i++) {
+        for (let j = i + 1; j < pillars.length; j++) {
+          const key = [pillars[i], pillars[j]].sort().join('|');
+          pairCounts[key] = (pairCounts[key] || 0) + 1;
+        }
+      }
+    });
+
+    Object.entries(pairCounts).forEach(([pairKey, count]) => {
+      const [a, b] = pairKey.split('|');
+      const dotA = document.getElementById(`dot-${a}`);
+      const dotB = document.getElementById(`dot-${b}`);
+      if (!dotA || !dotB) return;
+
+      const rectA = dotA.getBoundingClientRect();
+      const rectB = dotB.getBoundingClientRect();
+
+      const x1 = rectA.left + rectA.width / 2 - containerRect.left;
+      const y1 = rectA.top + rectA.height / 2 - containerRect.top;
+      const x2 = rectB.left + rectB.width / 2 - containerRect.left;
+      const y2 = rectB.top + rectB.height / 2 - containerRect.top;
+
+      // Curve the line outward to the side so it doesn't run straight
+      // through the theme pills sitting between the two headings.
+      const midX = (x1 + x2) / 2 + 60;
+      const midY = (y1 + y2) / 2;
+
+      const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+      path.setAttribute('d', `M ${x1} ${y1} Q ${midX} ${midY} ${x2} ${y2}`);
+      path.setAttribute('fill', 'none');
+      path.setAttribute('stroke', '#999');
+      path.setAttribute('stroke-width', Math.min(1 + count, 5));
+      path.setAttribute('stroke-opacity', 0.35);
+      path.setAttribute('stroke-dasharray', '4,5');
+      svg.appendChild(path);
+    });
+  }
+
   function escapeHtml(str) {
     const div = document.createElement('div');
     div.textContent = str;
     return div.innerHTML;
   }
+
+  window.addEventListener('resize', () => {
+    if (currentThemes.length) drawConnectors(currentThemes);
+  });
 
   loadDashboard();
 </script>
