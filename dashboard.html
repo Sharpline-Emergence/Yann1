@@ -40,6 +40,25 @@
   }
   #detail-panel .detail-pillars { color: #B8C4CE; margin-top: 2px; font-size: 12.5px; }
   #detail-panel .detail-dismiss { color: #7C8B99; font-size: 11px; margin-top: 2px; }
+
+  @keyframes flash-in {
+    0%   { background: #4A9B7F; }
+    100% { background: #2A3B4C; }
+  }
+  #detail-panel.flash { animation: flash-in 0.6s ease-out; }
+
+  /* On wide screens there's room beside the diagram instead of covering
+     the page header — switch to a floating sidebar card there. */
+  @media (min-width: 900px) {
+    #detail-panel {
+      top: 160px;
+      left: auto;
+      right: 24px;
+      width: 260px;
+      border-radius: 14px;
+      padding: 16px 18px;
+    }
+  }
   .theme-list { max-width: 640px; margin: 36px auto 0; }
   .theme-list h3 { font-family: 'Fraunces', serif; font-size: 18px; margin-bottom: 10px; }
   .theme-list-item { display: flex; justify-content: space-between; gap: 12px; padding: 8px 0; border-bottom: 1px solid #eee; font-size: 14px; }
@@ -202,6 +221,12 @@
       <div class="detail-dismiss">tap to dismiss</div>
     `;
     panel.classList.add('visible');
+    // Restart the flash animation even if it's already mid-run — removing
+    // and re-adding the class alone won't retrigger CSS animations unless
+    // the browser sees a style recalculation in between, hence the reflow.
+    panel.classList.remove('flash');
+    void panel.offsetWidth;
+    panel.classList.add('flash');
   }
 
   document.getElementById('detail-panel').addEventListener('click', () => {
