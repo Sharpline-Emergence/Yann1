@@ -14,7 +14,8 @@
   .legend { display: flex; gap: 18px; flex-wrap: wrap; justify-content: center; margin: 16px 0 8px; font-size: 13px; }
   .legend-item { display: flex; align-items: center; gap: 6px; }
   .legend-dot { width: 12px; height: 12px; border-radius: 50%; display: inline-block; }
-  .theme-circle circle { cursor: pointer; touch-action: manipulation; }
+  .theme-circle circle { touch-action: manipulation; }
+  .theme-circle circle:first-child { cursor: pointer; }
   #detail-panel {
     max-width: 500px; margin: 18px auto 0; padding: 14px 18px;
     background: #F5F7F5; border-radius: 12px; font-size: 14px;
@@ -244,6 +245,19 @@
       const g = document.createElementNS(svgNS, 'g');
       g.setAttribute('class', 'theme-circle');
 
+      // Invisible, generously-sized tap target — the visible dot below stays
+      // small for a clean look, but taps/clicks anywhere within a much wider
+      // radius still register. Small circles packed tightly together are easy
+      // to miss by a few pixels on touch, so the real hit area needs to be
+      // bigger than what's actually drawn.
+      const hitArea = document.createElementNS(svgNS, 'circle');
+      hitArea.setAttribute('cx', n.x);
+      hitArea.setAttribute('cy', n.y);
+      hitArea.setAttribute('r', n.r + 16);
+      hitArea.setAttribute('fill', '#000');
+      hitArea.setAttribute('fill-opacity', '0');
+      g.appendChild(hitArea);
+
       const circle = document.createElementNS(svgNS, 'circle');
       circle.setAttribute('cx', n.x);
       circle.setAttribute('cy', n.y);
@@ -253,10 +267,9 @@
       g.appendChild(circle);
 
       // Pointer Events API handles mouse clicks and touch taps through a
-      // single unified event — no separate title-tooltip, which was
-      // intercepting taps on some mobile browsers before you could reach
-      // the actual click handler.
-      circle.addEventListener('pointerup', () => showDetail(n));
+      // single unified event. Bound to the invisible hit area, not the
+      // small visible circle, so precision isn't the bottleneck.
+      hitArea.addEventListener('pointerup', () => showDetail(n));
 
       svg.appendChild(g);
     });
