@@ -32,8 +32,16 @@
 <div class="wrap">
   <div class="q-wrap">
 
+    <div class="card" style="margin-bottom:20px;">
+      <div class="field" style="margin-bottom:0;">
+        <label for="location">City or postal code</label>
+        <input type="text" id="location" placeholder="e.g. Chilliwack, BC or V2R 1A1">
+      </div>
+      <p class="helper-text" style="margin-top:6px; margin-bottom:0;">Helps us suggest things happening near you later on.</p>
+    </div>
+
     <div id="questionnaire">
-      <p class="q-progress-label" id="progressLabel">Question 1 of 6</p>
+      <p class="q-progress-label" id="progressLabel">Question 1 of 10</p>
       <div class="q-progress-bar"><div class="q-progress-fill" id="progressFill" style="width:16.6%"></div></div>
 
       <div id="qBody"></div>
@@ -94,9 +102,31 @@
       text: "How would you describe your current social life?",
       options: ['Very active', 'Active enough', 'Could be better', 'Limited', 'Very isolated']
     },
+    {
+      id: 'q7', type: 'chips',
+      text: "Which of these areas would you most like to improve today?",
+      options: ['Physical health', 'Learning new things', 'Meeting people', 'Finding purpose', 'Enjoying life more'],
+      allowCustom: false
+    },
+    {
+      id: 'q8', type: 'single',
+      text: "How often do you currently feel excited about the week ahead?",
+      options: ['Very often', 'Often', 'Sometimes', 'Rarely', 'Never']
+    },
+    {
+      id: 'q9', type: 'chips',
+      text: "What prevents you from doing more of the things you enjoy?",
+      options: ['Lack of energy', 'Time management', 'Confidence', 'Health concerns', 'Lack of ideas', 'Lack of companionship', 'Motivation'],
+      allowCustom: true
+    },
+    {
+      id: 'q10', type: 'text',
+      text: "If retirement could become your best chapter yet, what would that look like?",
+      placeholder: "Paint the picture — even a rough sketch is fine."
+    },
   ];
 
-  const answers = {}; // q1..q6
+  const answers = {}; // q1..q10
   let current = 0;
 
   const qBody = document.getElementById('qBody');
@@ -203,6 +233,19 @@
     nextBtn.disabled = true;
     nextBtn.textContent = 'Saving…';
 
+    const location = document.getElementById('location').value.trim() || null;
+    const { error: profileError } = await supabase
+      .from('profiles')
+      .upsert({ id: userId, location });
+
+    if (profileError) {
+      msg.textContent = profileError.message;
+      msg.className = 'msg error';
+      nextBtn.disabled = false;
+      nextBtn.textContent = 'Next';
+      return;
+    }
+
     const { error: saveError } = await supabase
       .from('questionnaire_responses')
       .upsert({ user_id: userId, answers, updated_at: new Date().toISOString() });
@@ -245,13 +288,13 @@
 
   requireSession().then(async session => {
     if (!session) return;
-    // Pre-fill from any existing questionnaire answers (refresh/back-nav safe).
-    const { data } = await supabase
-      .from('questionnaire_responses')
-      .select('answers')
-      .eq('user_id', session.user.id)
-      .maybeSingle();
-    if (data?.answers) Object.assign(answers, data.answers);
+    // Pre-fill from any existing profile / questionnaire data (refresh/back-nav safe).
+    const [{ data: profile }, { data: responses }] = await Promise.all([
+      supabase.from('profiles').select('location').eq('id', session.user.id).maybeSingle(),
+      supabase.from('questionnaire_responses').select('answers').eq('user_id', session.user.id).maybeSingle(),
+    ]);
+    if (profile?.location) document.getElementById('location').value = profile.location;
+    if (responses?.answers) Object.assign(answers, responses.answers);
     render();
   });
 </script>
