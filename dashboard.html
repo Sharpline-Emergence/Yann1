@@ -296,12 +296,12 @@
       g.appendChild(circle);
 
       // Pointer Events API handles mouse clicks and touch taps through a
-      // single unified event. Bound to the invisible hit area, not the
-      // small visible circle, so precision isn't the bottleneck.
-      hitArea.addEventListener('click', () => {
-        console.log('CIRCLE CLICKED:', n.label); // temporary — testing desktop click handling
-        showDetail(n);
-      });
+      // single unified event. Bound to the GROUP, not either individual
+      // circle — the visible dot is drawn on top of the invisible hit area,
+      // so a listener on just the hit area would miss clicks that land
+      // directly on the visible circle (which is most precise mouse clicks).
+      // Binding to the group catches a click on either child via bubbling.
+      g.addEventListener('click', () => showDetail(n));
 
       svg.appendChild(g);
     });
