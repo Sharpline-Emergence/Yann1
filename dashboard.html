@@ -48,12 +48,16 @@
   #detail-panel.flash { animation: flash-in 0.6s ease-out; }
 
   /* On wide screens there's room beside the diagram instead of covering
-     the page header — switch to a floating sidebar card there. */
+     the page header — switched to a floating sidebar card there. Exact
+     left/top position is calculated in JS from the diagram's real
+     rendered position (see positionPanelDesktop), not guessed here,
+     since container width varies and a fixed CSS offset kept colliding
+     with the diagram itself at different window sizes. */
   @media (min-width: 900px) {
-    #detail-panel {
-      top: 160px;
+    #detail-panel.desktop-side {
+      top: auto;
       left: auto;
-      right: 24px;
+      right: auto;
       width: 260px;
       border-radius: 14px;
       padding: 16px 18px;
@@ -212,7 +216,38 @@
     return nodes;
   }
 
+  function positionPanelDesktop() {
+    const panel = document.getElementById('detail-panel');
+    const svg = document.getElementById('map-svg');
+    if (window.innerWidth < 900) {
+      panel.classList.remove('desktop-side');
+      panel.style.top = '';
+      panel.style.left = '';
+      return;
+    }
+    const svgRect = svg.getBoundingClientRect();
+    const panelWidth = 260;
+    const spaceOnRight = window.innerWidth - svgRect.right;
+
+    if (spaceOnRight >= panelWidth + 40) {
+      // Room beside the diagram — float it just outside the right edge,
+      // vertically aligned a bit below the top of the diagram itself.
+      panel.classList.add('desktop-side');
+      panel.style.left = (svgRect.right + 20) + 'px';
+      panel.style.top = (svgRect.top + 60) + 'px';
+    } else {
+      // Window is wide (≥900px) but the diagram still fills most of it —
+      // fall back to the full-width top bar rather than risk overlap.
+      panel.classList.remove('desktop-side');
+      panel.style.top = '';
+      panel.style.left = '';
+    }
+  }
+
+  window.addEventListener('resize', positionPanelDesktop);
+
   function showDetail(theme) {
+    positionPanelDesktop();
     const panel = document.getElementById('detail-panel');
     const pillarNames = (theme.pillars || []).map(p => PILLARS[p]?.label || p).join(' · ');
     panel.innerHTML = `
@@ -332,6 +367,7 @@
     });
 
     renderThemeList(themes);
+    positionPanelDesktop();
   }
 
   loadDashboard();
