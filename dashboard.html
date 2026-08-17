@@ -8,13 +8,24 @@
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@500;600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/style.css">
 <style>
-  #map-svg { width: 100%; height: auto; display: block; max-width: 800px; margin: 0 auto; }
-  .pillar-label-text { font-family: 'Fraunces', serif; font-weight: 600; font-size: 26px; }
-  .theme-label-text { font-family: 'Inter', sans-serif; font-size: 10.5px; fill: #1A1F1C; paint-order: stroke; stroke: white; stroke-width: 3px; stroke-linejoin: round; }
+  #map-svg { width: 100%; height: auto; display: block; max-width: 800px; margin: 0 auto; touch-action: manipulation; }
+  .pillar-label-text { font-family: 'Fraunces', serif; font-weight: 600; font-size: 24px; }
   .retake-link { font-size: 13px; margin-top: 24px; display: inline-block; }
   .legend { display: flex; gap: 18px; flex-wrap: wrap; justify-content: center; margin: 16px 0 8px; font-size: 13px; }
   .legend-item { display: flex; align-items: center; gap: 6px; }
   .legend-dot { width: 12px; height: 12px; border-radius: 50%; display: inline-block; }
+  .theme-circle { cursor: pointer; }
+  #detail-panel {
+    max-width: 500px; margin: 18px auto 0; padding: 14px 18px;
+    background: #F5F7F5; border-radius: 12px; font-size: 14px;
+    min-height: 22px; text-align: center;
+  }
+  #detail-panel .detail-label { font-weight: 600; font-size: 15px; }
+  #detail-panel .detail-pillars { color: #666; margin-top: 3px; }
+  .theme-list { max-width: 640px; margin: 36px auto 0; }
+  .theme-list h3 { font-family: 'Fraunces', serif; font-size: 18px; margin-bottom: 10px; }
+  .theme-list-item { display: flex; justify-content: space-between; gap: 12px; padding: 8px 0; border-bottom: 1px solid #eee; font-size: 14px; }
+  .theme-list-item .tl-pillars { color: #888; font-size: 12.5px; white-space: nowrap; }
 </style>
 </head>
 <body>
@@ -29,7 +40,11 @@
 
   <div class="legend" id="legend"></div>
 
-  <svg id="map-svg" viewBox="0 0 800 800" xmlns="http://www.w3.org/2000/svg"></svg>
+  <svg id="map-svg" viewBox="0 0 1100 1100" xmlns="http://www.w3.org/2000/svg"></svg>
+
+  <div id="detail-panel">Tap a circle to see what it is.</div>
+
+  <div id="theme-list" class="theme-list"></div>
 
   <p id="empty-state" class="helper-text" style="display:none; text-align:center;">
     No themes yet — <a href="onboarding.html">answer a few questions</a> to build your map.
@@ -44,9 +59,10 @@
   import { supabase } from './js/supabase-client.js';
   import { requireSession, signOut } from './js/auth.js';
 
-  const CENTER = { x: 400, y: 400 };
-  const OFFSET = 120;
-  const BIG_R = 200;
+  const CENTER = { x: 550, y: 550 };
+  const OFFSET = 140;
+  const BIG_R = 260;
+  const VIEW_SIZE = 1100;
 
   const PILLARS = {
     purpose:     { label: 'Purpose',     color: '#C49A2E', cx: CENTER.x,          cy: CENTER.y - OFFSET },
@@ -92,7 +108,7 @@
   }
 
   function weightRadius(w) {
-    return w === 3 ? 32 : w === 2 ? 24 : 17;
+    return w === 3 ? 26 : w === 2 ? 20 : 14;
   }
 
   function computeTargets(themes) {
@@ -115,23 +131,27 @@
         ty = pillarKeys.reduce((sum, k) => sum + PILLARS[k].cy, 0) / pillarKeys.length;
       }
 
-      // Small random jitter so identical-target themes don't start stacked exactly on
-      // top of each other (which would break the collision-separation math below).
-      tx += (Math.random() - 0.5) * 20;
-      ty += (Math.random() - 0.5) * 20;
+      // Wider random spread (not just a tiny jitter) so themes sharing the same pillar
+      // combination — very common when most answers touch 3-4 pillars — start spaced
+      // out across the overlap zone instead of all landing on one exact point.
+      tx += (Math.random() - 0.5) * 90;
+      ty += (Math.random() - 0.5) * 90;
 
       return { ...t, tx, ty, x: tx, y: ty, r: weightRadius(t.weight) };
     });
   }
 
-  function relax(nodes, iterations = 220) {
+  function relax(nodes, iterations = 320) {
     for (let iter = 0; iter < iterations; iter++) {
       for (let i = 0; i < nodes.length; i++) {
         for (let j = i + 1; j < nodes.length; j++) {
           const a = nodes[i], b = nodes[j];
           const dx = b.x - a.x, dy = b.y - a.y;
           const dist = Math.sqrt(dx * dx + dy * dy) || 0.01;
-          const minDist = a.r + b.r + 6;
+          // Padding is generous (not just circle radius) because each circle
+          // has a two-line text label underneath it — two circles can be far
+          // enough apart to not touch, yet still have their labels collide.
+          const minDist = a.r + b.r + 46;
           if (dist < minDist) {
             const overlap = (minDist - dist) / 2;
             const nx = dx / dist, ny = dy / dist;
@@ -142,31 +162,40 @@
       }
       // Gentle pull back toward each node's natural target position, so
       // separation doesn't let themes drift arbitrarily far from where
-      // their pillar-membership actually places them.
+      // their pillar-membership actually places them. Kept weak so there's
+      // room to actually spread out within a crowded overlap zone.
       nodes.forEach(n => {
-        n.x += (n.tx - n.x) * 0.015;
-        n.y += (n.ty - n.y) * 0.015;
-        n.x = Math.max(n.r + 5, Math.min(795 - n.r, n.x));
-        n.y = Math.max(n.r + 5, Math.min(795 - n.r, n.y));
+        n.x += (n.tx - n.x) * 0.01;
+        n.y += (n.ty - n.y) * 0.01;
+        n.x = Math.max(n.r + 15, Math.min(VIEW_SIZE - 15 - n.r, n.x));
+        n.y = Math.max(n.r + 15, Math.min(VIEW_SIZE - 15 - n.r, n.y));
       });
     }
     return nodes;
   }
 
-  function wrapLabel(label, maxCharsPerLine = 14) {
-    const words = label.split(' ');
-    const lines = [];
-    let line = '';
-    words.forEach(word => {
-      if ((line + ' ' + word).trim().length > maxCharsPerLine && line) {
-        lines.push(line.trim());
-        line = word;
-      } else {
-        line = (line + ' ' + word).trim();
-      }
-    });
-    if (line) lines.push(line);
-    return lines.slice(0, 2); // cap at 2 lines to keep things readable
+  function showDetail(theme) {
+    const panel = document.getElementById('detail-panel');
+    const pillarNames = (theme.pillars || []).map(p => PILLARS[p]?.label || p).join(' · ');
+    panel.innerHTML = `<div class="detail-label">${escapeHtml(theme.label)}</div><div class="detail-pillars">${escapeHtml(pillarNames)}</div>`;
+  }
+
+  function escapeHtml(str) {
+    const div = document.createElement('div');
+    div.textContent = str;
+    return div.innerHTML;
+  }
+
+  function renderThemeList(themes) {
+    const list = document.getElementById('theme-list');
+    const sorted = [...themes].sort((a, b) => b.weight - a.weight);
+    list.innerHTML = `
+      <h3>All your themes</h3>
+      ${sorted.map(t => {
+        const pillarNames = (t.pillars || []).map(p => PILLARS[p]?.label || p).join(' · ');
+        return `<div class="theme-list-item"><span>${escapeHtml(t.label)}</span><span class="tl-pillars">${escapeHtml(pillarNames)}</span></div>`;
+      }).join('')}
+    `;
   }
 
   function renderMap(themes) {
@@ -190,8 +219,11 @@
     Object.entries(PILLARS).forEach(([key, p]) => {
       const dx = p.cx - CENTER.x, dy = p.cy - CENTER.y;
       const dist = Math.sqrt(dx * dx + dy * dy) || 1;
-      const labelX = p.cx + (dx / dist) * (BIG_R + 35);
-      const labelY = p.cy + (dy / dist) * (BIG_R + 35);
+      // Clamp so long labels like "Connections" can't render past the
+      // viewBox edge regardless of which side of the diagram they're on.
+      const margin = 90;
+      const labelX = Math.max(margin, Math.min(VIEW_SIZE - margin, p.cx + (dx / dist) * (BIG_R + 35)));
+      const labelY = Math.max(30, Math.min(VIEW_SIZE - 10, p.cy + (dy / dist) * (BIG_R + 35)));
       const text = document.createElementNS(svgNS, 'text');
       text.setAttribute('x', labelX);
       text.setAttribute('y', labelY);
@@ -203,9 +235,14 @@
     });
 
     // Theme circles, positioned via geometry + collision relaxation.
+    // No permanent text labels on the circles themselves — with 8-15 themes
+    // that reads as clutter on any screen, and is close to illegible on a
+    // phone. Tap/click a circle instead to see its name in the detail panel
+    // above, and the full list below has everything in plain readable text.
     const nodes = relax(computeTargets(themes));
     nodes.forEach(n => {
       const g = document.createElementNS(svgNS, 'g');
+      g.setAttribute('class', 'theme-circle');
 
       const circle = document.createElementNS(svgNS, 'circle');
       circle.setAttribute('cx', n.x);
@@ -220,23 +257,12 @@
       title.textContent = `${n.label} — ${pillarNames}`;
       g.appendChild(title);
 
-      const lines = wrapLabel(n.label);
-      const text = document.createElementNS(svgNS, 'text');
-      text.setAttribute('x', n.x);
-      text.setAttribute('y', n.y + n.r + 12);
-      text.setAttribute('text-anchor', 'middle');
-      text.setAttribute('class', 'theme-label-text');
-      lines.forEach((line, i) => {
-        const tspan = document.createElementNS(svgNS, 'tspan');
-        tspan.setAttribute('x', n.x);
-        tspan.setAttribute('dy', i === 0 ? 0 : 12);
-        tspan.textContent = line;
-        text.appendChild(tspan);
-      });
-      g.appendChild(text);
+      g.addEventListener('click', () => showDetail(n));
 
       svg.appendChild(g);
     });
+
+    renderThemeList(themes);
   }
 
   loadDashboard();
