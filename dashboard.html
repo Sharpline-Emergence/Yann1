@@ -14,7 +14,7 @@
   .legend { display: flex; gap: 18px; flex-wrap: wrap; justify-content: center; margin: 16px 0 8px; font-size: 13px; }
   .legend-item { display: flex; align-items: center; gap: 6px; }
   .legend-dot { width: 12px; height: 12px; border-radius: 50%; display: inline-block; }
-  .theme-circle { cursor: pointer; }
+  .theme-circle circle { cursor: pointer; touch-action: manipulation; }
   #detail-panel {
     max-width: 500px; margin: 18px auto 0; padding: 14px 18px;
     background: #F5F7F5; border-radius: 12px; font-size: 14px;
@@ -252,12 +252,11 @@
       circle.setAttribute('fill-opacity', '0.88');
       g.appendChild(circle);
 
-      const title = document.createElementNS(svgNS, 'title');
-      const pillarNames = (n.pillars || []).map(p => PILLARS[p]?.label || p).join(', ');
-      title.textContent = `${n.label} — ${pillarNames}`;
-      g.appendChild(title);
-
-      g.addEventListener('click', () => showDetail(n));
+      // Pointer Events API handles mouse clicks and touch taps through a
+      // single unified event — no separate title-tooltip, which was
+      // intercepting taps on some mobile browsers before you could reach
+      // the actual click handler.
+      circle.addEventListener('pointerup', () => showDetail(n));
 
       svg.appendChild(g);
     });
