@@ -18,27 +18,20 @@
   .theme-circle circle:first-child { cursor: pointer; }
   #map-wrap { position: relative; max-width: 800px; margin: 0 auto; }
   #detail-panel {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    z-index: 1000;
+    max-width: 500px;
+    margin: 0 auto 20px;
     padding: 14px 20px;
-    padding-top: calc(14px + env(safe-area-inset-top, 0px));
     background: #2A3B4C;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.25);
+    border-radius: 12px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.2);
     font-size: 14px;
     text-align: center;
     cursor: pointer;
-    display: none; /* hidden until a circle is tapped */
+    min-height: 22px;
   }
-  #detail-panel.visible { display: block; }
-  #detail-panel .detail-label {
-    font-weight: 600; font-size: 15px; color: #fff;
-    display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical;
-    overflow: hidden; white-space: nowrap; text-overflow: ellipsis;
-  }
+  #detail-panel .detail-label { font-weight: 600; font-size: 15px; color: #fff; }
   #detail-panel .detail-pillars { color: #B8C4CE; margin-top: 2px; font-size: 12.5px; }
+  #detail-panel .detail-hint { color: #B8C4CE; font-size: 13.5px; }
   #detail-panel .detail-dismiss { color: #7C8B99; font-size: 11px; margin-top: 2px; }
 
   @keyframes flash-in {
@@ -46,23 +39,6 @@
     100% { background: #2A3B4C; }
   }
   #detail-panel.flash { animation: flash-in 0.6s ease-out; }
-
-  /* On wide screens there's room beside the diagram instead of covering
-     the page header — switched to a floating sidebar card there. Exact
-     left/top position is calculated in JS from the diagram's real
-     rendered position (see positionPanelDesktop), not guessed here,
-     since container width varies and a fixed CSS offset kept colliding
-     with the diagram itself at different window sizes. */
-  @media (min-width: 900px) {
-    #detail-panel.desktop-side {
-      top: auto;
-      left: auto;
-      right: auto;
-      width: 260px;
-      border-radius: 14px;
-      padding: 16px 18px;
-    }
-  }
   .theme-list { max-width: 640px; margin: 36px auto 0; }
   .theme-list h3 { font-family: 'Fraunces', serif; font-size: 18px; margin-bottom: 10px; }
   .theme-list-item { display: flex; justify-content: space-between; gap: 12px; padding: 8px 0; border-bottom: 1px solid #eee; font-size: 14px; }
@@ -81,10 +57,11 @@
 
   <div class="legend" id="legend"></div>
 
+  <div id="detail-panel"><span class="detail-hint">Tap any circle below to see what it is.</span></div>
+
   <div id="map-wrap">
     <svg id="map-svg" viewBox="0 0 1100 1100" xmlns="http://www.w3.org/2000/svg"></svg>
   </div>
-  <div id="detail-panel"></div>
 
   <div id="theme-list" class="theme-list"></div>
 
@@ -216,46 +193,16 @@
     return nodes;
   }
 
-  function positionPanelDesktop() {
-    const panel = document.getElementById('detail-panel');
-    const svg = document.getElementById('map-svg');
-    if (window.innerWidth < 900) {
-      panel.classList.remove('desktop-side');
-      panel.style.top = '';
-      panel.style.left = '';
-      return;
-    }
-    const svgRect = svg.getBoundingClientRect();
-    const panelWidth = 260;
-    const spaceOnRight = window.innerWidth - svgRect.right;
-
-    if (spaceOnRight >= panelWidth + 40) {
-      // Room beside the diagram — float it just outside the right edge,
-      // vertically aligned a bit below the top of the diagram itself.
-      panel.classList.add('desktop-side');
-      panel.style.left = (svgRect.right + 20) + 'px';
-      panel.style.top = (svgRect.top + 60) + 'px';
-    } else {
-      // Window is wide (≥900px) but the diagram still fills most of it —
-      // fall back to the full-width top bar rather than risk overlap.
-      panel.classList.remove('desktop-side');
-      panel.style.top = '';
-      panel.style.left = '';
-    }
-  }
-
-  window.addEventListener('resize', positionPanelDesktop);
+  const HINT_HTML = '<span class="detail-hint">Tap any circle below to see what it is.</span>';
 
   function showDetail(theme) {
-    positionPanelDesktop();
     const panel = document.getElementById('detail-panel');
     const pillarNames = (theme.pillars || []).map(p => PILLARS[p]?.label || p).join(' · ');
     panel.innerHTML = `
       <div class="detail-label">${escapeHtml(theme.label)}</div>
       <div class="detail-pillars">${escapeHtml(pillarNames)}</div>
-      <div class="detail-dismiss">tap to dismiss</div>
+      <div class="detail-dismiss">tap to clear</div>
     `;
-    panel.classList.add('visible');
     // Restart the flash animation even if it's already mid-run — removing
     // and re-adding the class alone won't retrigger CSS animations unless
     // the browser sees a style recalculation in between, hence the reflow.
@@ -264,8 +211,12 @@
     panel.classList.add('flash');
   }
 
+  // Tapping the panel while it's showing a theme resets it back to the
+  // instructional hint, rather than hiding it — the panel always stays in
+  // the same place in the page (no fixed/floating positioning, so it can
+  // never end up overlapping a pillar label at some window size again).
   document.getElementById('detail-panel').addEventListener('click', () => {
-    document.getElementById('detail-panel').classList.remove('visible');
+    document.getElementById('detail-panel').innerHTML = HINT_HTML;
   });
 
   function escapeHtml(str) {
@@ -367,7 +318,6 @@
     });
 
     renderThemeList(themes);
-    positionPanelDesktop();
   }
 
   loadDashboard();
