@@ -14,6 +14,12 @@
   .legend { display: flex; gap: 18px; flex-wrap: wrap; justify-content: center; margin: 16px 0 8px; font-size: 13px; }
   .legend-item { display: flex; align-items: center; gap: 6px; }
   .legend-dot { width: 12px; height: 12px; border-radius: 50%; display: inline-block; }
+
+  @media (max-width: 480px) {
+    .legend { gap: 10px; font-size: 12px; }
+    .legend-item { gap: 4px; }
+    .legend-dot { width: 9px; height: 9px; }
+  }
   .theme-circle circle { touch-action: manipulation; }
   .theme-circle circle:first-child { cursor: pointer; }
   #map-wrap { position: relative; max-width: 800px; margin: 0 auto; }
