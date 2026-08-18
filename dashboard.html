@@ -100,6 +100,11 @@
 
   document.getElementById('signout-btn').addEventListener('click', signOut);
 
+  // Tracks which theme labels have already been tapped, purely to lighten
+  // their circle so it's clear at a glance what's already been checked.
+  // Resets on page reload — no need to persist this anywhere.
+  const VIEWED_THEMES = new Set();
+
   // Legend
   document.getElementById('legend').innerHTML = Object.values(PILLARS).map(p => `
     <span class="legend-item"><span class="legend-dot" style="background:${p.color}"></span>${p.label}</span>
@@ -310,7 +315,7 @@
       circle.setAttribute('cx', n.x);
       circle.setAttribute('cy', n.y);
       circle.setAttribute('r', n.r);
-      circle.setAttribute('fill', '#2A3B4C');
+      circle.setAttribute('fill', VIEWED_THEMES.has(n.label) ? '#7C8B99' : '#2A3B4C');
       circle.setAttribute('fill-opacity', '0.88');
       g.appendChild(circle);
 
@@ -320,7 +325,14 @@
       // so a listener on just the hit area would miss clicks that land
       // directly on the visible circle (which is most precise mouse clicks).
       // Binding to the group catches a click on either child via bubbling.
-      g.addEventListener('click', () => showDetail(n));
+      g.addEventListener('click', () => {
+        showDetail(n);
+        // Lighten the circle once viewed so it's obvious at a glance which
+        // ones have already been checked — resets on page reload, which is
+        // fine, this is just a lightweight browsing aid, not saved state.
+        VIEWED_THEMES.add(n.label);
+        circle.setAttribute('fill', '#7C8B99');
+      });
 
       svg.appendChild(g);
     });
