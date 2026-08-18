@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Going deeper — Vivelo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@500;600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+<style>
+  .q-wrap { max-width: 640px; margin: 0 auto; }
+  .q-progress-label { font-size: 13px; color: #777; margin-bottom: 6px; }
+  .q-progress-bar { height: 6px; background: #eee; border-radius: 6px; overflow: hidden; margin-bottom: 32px; }
+  .q-progress-fill { height: 100%; background: #C49A2E; transition: width 0.3s ease; }
+  .q-question { font-size: 22px; font-family: 'Fraunces', serif; margin-bottom: 16px; }
+  .q-textarea { width: 100%; min-height: 110px; padding: 14px; font-size: 15px; font-family: 'Inter', sans-serif; border: 1.5px solid #ddd; border-radius: 10px; resize: vertical; }
+  .q-textarea:focus { outline: none; border-color: #C49A2E; }
+  .q-nav { display: flex; justify-content: space-between; margin-top: 28px; }
+  .q-skip { font-size: 13px; color: #999; background: none; border: none; cursor: pointer; text-decoration: underline; }
+  .q-thinking { text-align: center; padding: 60px 20px; }
+  .module-badge {
+    display: inline-block; background: #FEF3D0; color: #C49A2E; font-size: 12px;
+    font-weight: 600; padding: 4px 12px; border-radius: 50px; margin-bottom: 14px;
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="q-wrap">
+
+    <div id="questionnaire">
+      <span class="module-badge">Module 2 · Purpose</span>
+      <p class="q-progress-label" id="progressLabel">Question 1 of 10</p>
+      <div class="q-progress-bar"><div class="q-progress-fill" id="progressFill" style="width:10%"></div></div>
+
+      <div id="qBody"></div>
+
+      <div class="q-nav">
+        <div>
+          <button class="btn btn-outline" id="backBtn" style="display:none;">Back</button>
+        </div>
+        <div>
+          <button class="q-skip" id="skipBtn">Skip this one</button>
+          <button class="btn btn-primary" id="nextBtn" style="margin-left:12px;">Next</button>
+        </div>
+      </div>
+      <p class="msg" id="msg"></p>
+    </div>
+
+    <div id="thinking" class="q-thinking" style="display:none;">
+      <h2 class="display">Refining your map…</h2>
+      <p class="helper-text">Weaving these answers into your themes. About 10 seconds.</p>
+    </div>
+
+  </div>
+</div>
+
+<script type="module">
+  import { supabase } from './js/supabase-client.js';
+  import { requireSession } from './js/auth.js';
+
+  // Module 2 = Yann's "Pillar 1: PURPOSE" deep-dive set from his original
+  // email. Stored under q11..q20 so Module 1's q1..q10 are never touched.
+  const QUESTIONS = [
+    { id: 'q11', text: "What gives you the feeling that a day was well spent?", placeholder: "Whatever comes to mind first." },
+    { id: 'q12', text: "Do you currently feel you have a clear purpose?", placeholder: "Honest answer, however it comes out." },
+    { id: 'q13', text: "What activities make you lose track of time?", placeholder: "The things where you look up and an hour's gone." },
+    { id: 'q14', text: "What skills or knowledge would you still like to share with others?", placeholder: "Things you know that others might value." },
+    { id: 'q15', text: "Would you like to leave a legacy or make a contribution?", placeholder: "What that might look like, if anything." },
+    { id: 'q16', text: "What causes or topics matter most to you?", placeholder: "e.g. environment, education, family, community…" },
+    { id: 'q17', text: "When do you feel most useful?", placeholder: "A moment or situation that comes to mind." },
+    { id: 'q18', text: "What challenge would excite you in the next year?", placeholder: "Big or small." },
+    { id: 'q19', text: "If younger people asked for your advice, what could you teach them?", placeholder: "What you'd want them to know." },
+    { id: 'q20', text: "Complete this sentence: \"My life feels meaningful when…\"", placeholder: "Finish it however feels true." },
+  ];
+
+  const answers = {}; // q11..q20 — merged with existing q1..q10 on submit
+  let current = 0;
+
+  const qBody = document.getElementById('qBody');
+  const progressLabel = document.getElementById('progressLabel');
+  const progressFill = document.getElementById('progressFill');
+  const backBtn = document.getElementById('backBtn');
+  const nextBtn = document.getElementById('nextBtn');
+  const skipBtn = document.getElementById('skipBtn');
+  const msg = document.getElementById('msg');
+
+  function render() {
+    const q = QUESTIONS[current];
+    progressLabel.textContent = `Question ${current + 1} of ${QUESTIONS.length}`;
+    progressFill.style.width = `${((current + 1) / QUESTIONS.length) * 100}%`;
+    backBtn.style.display = current === 0 ? 'none' : 'inline-block';
+    msg.textContent = '';
+
+    qBody.innerHTML = `
+      <div class="q-question">${q.text}</div>
+      <textarea class="q-textarea" id="qInput" placeholder="${q.placeholder}">${answers[q.id] || ''}</textarea>
+    `;
+    document.getElementById('qInput').addEventListener('input', e => {
+      answers[q.id] = e.target.value;
+    });
+  }
+
+  backBtn.addEventListener('click', () => { current--; render(); });
+  skipBtn.addEventListener('click', () => advance());
+  nextBtn.addEventListener('click', () => advance());
+
+  function advance() {
+    if (current < QUESTIONS.length - 1) {
+      current++;
+      render();
+    } else {
+      submit();
+    }
+  }
+
+  async function submit() {
+    const session = await requireSession();
+    if (!session) return;
+    const userId = session.user.id;
+
+    nextBtn.disabled = true;
+    nextBtn.textContent = 'Saving…';
+
+    // Merge with whatever's already saved (Module 1's q1..q10) rather than
+    // overwriting — the theme extractor works best from the full answer set.
+    const { data: existing } = await supabase
+      .from('questionnaire_responses')
+      .select('answers')
+      .eq('user_id', userId)
+      .maybeSingle();
+    const mergedAnswers = { ...(existing?.answers || {}), ...answers };
+
+    const { error: saveError } = await supabase
+      .from('questionnaire_responses')
+      .upsert({ user_id: userId, answers: mergedAnswers, updated_at: new Date().toISOString() });
+
+    if (saveError) {
+      msg.textContent = saveError.message;
+      msg.className = 'msg error';
+      nextBtn.disabled = false;
+      nextBtn.textContent = 'Next';
+      return;
+    }
+
+    document.getElementById('questionnaire').style.display = 'none';
+    document.getElementById('thinking').style.display = 'block';
+
+    const { data, error: fnError } = await supabase.functions.invoke('theme-extractor', {
+      body: { answers: mergedAnswers },
+    });
+
+    if (fnError || !data?.themes) {
+      window.location.href = 'dashboard.html';
+      return;
+    }
+
+    // Fresh extraction from the combined 20-answer set replaces the old themes.
+    await supabase.from('user_themes').delete().eq('user_id', userId);
+    const rows = data.themes.map(t => ({
+      user_id: userId,
+      label: t.label,
+      pillars: t.pillars,
+      weight: t.weight,
+      rationale: t.rationale || null,
+    }));
+    if (rows.length) await supabase.from('user_themes').insert(rows);
+
+    window.location.href = 'dashboard.html';
+  }
+
+  requireSession().then(async session => {
+    if (!session) return;
+    // Pre-fill from any existing Module 2 answers (refresh/back-nav safe).
+    const { data } = await supabase
+      .from('questionnaire_responses')
+      .select('answers')
+      .eq('user_id', session.user.id)
+      .maybeSingle();
+    if (data?.answers) {
+      QUESTIONS.forEach(q => {
+        if (data.answers[q.id] !== undefined) answers[q.id] = data.answers[q.id];
+      });
+    }
+    render();
+  });
+</script>
+</body>
+</html>
