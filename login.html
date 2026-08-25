@@ -7,35 +7,52 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@500;600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/style.css">
+<style>
+  .lang-switch { position: absolute; top: 20px; right: 20px; display: flex; gap: 6px; font-size: 13px; }
+  .lang-switch a { color: #777; text-decoration: none; padding: 2px 6px; border-radius: 4px; }
+  .lang-switch a.active { color: inherit; font-weight: 600; background: rgba(0,0,0,0.05); }
+</style>
 </head>
 <body>
+<div class="lang-switch">
+  <a href="#" data-lang-toggle="en">EN</a>
+  <a href="#" data-lang-toggle="fr">FR</a>
+</div>
 <div class="wrap">
   <div class="center" style="margin-bottom:32px;">
     <h1 class="display">Vivelo</h1>
-    <p class="helper-text">Sign in to build your life map</p>
+    <p class="helper-text" data-i18n="login.subtitle">Sign in to build your life map</p>
   </div>
 
   <div class="card">
     <div id="form-state">
       <div class="field">
-        <label for="email">Email address</label>
+        <label for="email" data-i18n="login.email.label">Email address</label>
         <input type="email" id="email" placeholder="you@example.com" autocomplete="email" required>
       </div>
-      <button class="btn btn-primary" id="send-link-btn">Send me a sign-in link</button>
-      <p class="helper-text">No password to create or remember. We'll send a link straight to your email — just open the email and tap the link, and you're signed in automatically. It's completely safe, and only works from the email address you enter here.</p>
+      <button class="btn btn-primary" id="send-link-btn" data-i18n="login.sendLink">Send me a sign-in link</button>
+      <p class="helper-text" data-i18n="login.passwordless.body">No password to create or remember. We'll send a link straight to your email — just open the email and tap the link, and you're signed in automatically. It's completely safe, and only works from the email address you enter here.</p>
     </div>
 
     <div id="sent-state" style="display:none;" class="center">
-      <p style="font-size:17px;">Check your inbox — we sent a sign-in link to <strong id="sent-email"></strong>.</p>
-      <p class="helper-text">Open the email and tap the button inside it. That's it — no password, no code to type. It'll bring you right back here, already signed in.</p>
+      <p style="font-size:17px;"><span data-i18n="login.sent.prefix">Check your inbox — we sent a sign-in link to </span><strong id="sent-email"></strong><span data-i18n="login.sent.suffix">.</span></p>
+      <p class="helper-text" data-i18n="login.sent.body">Open the email and tap the button inside it. That's it — no password, no code to type. It'll bring you right back here, already signed in.</p>
     </div>
 
     <p class="msg" id="msg"></p>
   </div>
 </div>
 
+<script src="js/translations.js"></script>
+<script src="js/i18n.js"></script>
 <script type="module">
   import { sendMagicLink } from './js/auth.js';
+
+  function t(key) {
+    const lang = window.viveloI18n ? window.viveloI18n.currentLang() : 'en';
+    const dict = (window.TRANSLATIONS && window.TRANSLATIONS[lang]) || (window.TRANSLATIONS && window.TRANSLATIONS.en) || {};
+    return dict[key];
+  }
 
   const btn = document.getElementById('send-link-btn');
   const emailInput = document.getElementById('email');
@@ -44,12 +61,12 @@
   btn.addEventListener('click', async () => {
     const email = emailInput.value.trim();
     if (!email) {
-      msg.textContent = 'Enter your email first.';
+      msg.textContent = t('login.errors.emptyEmail');
       msg.className = 'msg error';
       return;
     }
     btn.disabled = true;
-    btn.textContent = 'Sending…';
+    btn.textContent = t('login.sending');
     msg.textContent = '';
 
     const { error } = await sendMagicLink(email);
@@ -58,7 +75,7 @@
       msg.textContent = error.message;
       msg.className = 'msg error';
       btn.disabled = false;
-      btn.textContent = 'Send me a sign-in link';
+      btn.textContent = t('login.sendLink');
       return;
     }
 
