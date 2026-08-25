@@ -3,17 +3,88 @@
 // Add a new page's strings by adding new "pagename.section.thing" keys
 // to EVERY language block below — keep the key lists in sync.
 
-const TRANSLATIONS = {
+// Assigned to window explicitly (not just `const`) so pages that load their
+// own logic as a <script type="module"> — like onboarding.html — can see it.
+// Plain <script> pages can still refer to it as a bare TRANSLATIONS if they want.
+window.TRANSLATIONS = {
   en: {
     "meta.title": "Vivelo — map your next chapter",
     "index.hero.subtitle": "A living map of your Purpose, Connections, Mind, and Body — with an assistant that helps you find what's next.",
     "index.hero.cta": "Get started",
-    "index.hero.helper": "Private test build for early feedback — thanks for trying it out."
+    "index.hero.helper": "Private test build for early feedback — thanks for trying it out.",
+
+    "onboarding.location.label": "City or postal code",
+    "onboarding.location.placeholder": "e.g. Chilliwack, BC or V2R 1A1",
+    "onboarding.location.helper": "Helps us suggest things happening near you later on.",
+    "onboarding.progress": "Question {current} of {total}",
+    "onboarding.back": "Back",
+    "onboarding.skip": "Skip this one",
+    "onboarding.next": "Next",
+    "onboarding.saving": "Saving…",
+    "onboarding.thinking.title": "Thinking for a moment…",
+    "onboarding.thinking.body": "We're finding the themes in what you shared. This takes about 10 seconds.",
+    "onboarding.customPlaceholder": "Add your own…",
+    "onboarding.customAdd": "Add",
+
+    "onboarding.q1.text": "Looking back at your life, what activities have given you the greatest sense of satisfaction?",
+    "onboarding.q1.placeholder": "Take your time — there's no right answer here.",
+    "onboarding.q2.text": "What personal strengths do you believe people value most in you?",
+    "onboarding.q2.placeholder": "e.g. being a good listener, staying organized, patience…",
+    "onboarding.q3.text": "What are three things you'd like to experience or achieve in the next five years?",
+    "onboarding.q3.placeholder": "Big or small — whatever comes to mind.",
+    "onboarding.q4.text": "How would you ideally spend a free and fulfilling day?",
+    "onboarding.q4.placeholder": "Walk us through it, start to finish.",
+    "onboarding.q5.text": "Which activities do you currently enjoy most?",
+    "onboarding.q5.options": ["Reading", "Walking", "Sports", "Volunteering", "Travel", "Arts", "Music", "Learning", "Social events"],
+    "onboarding.q6.text": "How would you describe your current social life?",
+    "onboarding.q6.options": ["Very active", "Active enough", "Could be better", "Limited", "Very isolated"],
+    "onboarding.q7.text": "Which of these areas would you most like to improve today?",
+    "onboarding.q7.options": ["Physical health", "Learning new things", "Meeting people", "Finding purpose", "Enjoying life more"],
+    "onboarding.q8.text": "How often do you currently feel excited about the week ahead?",
+    "onboarding.q8.options": ["Very often", "Often", "Sometimes", "Rarely", "Never"],
+    "onboarding.q9.text": "What prevents you from doing more of the things you enjoy?",
+    "onboarding.q9.options": ["Lack of energy", "Time management", "Confidence", "Health concerns", "Lack of ideas", "Lack of companionship", "Motivation"],
+    "onboarding.q10.text": "If retirement could become your best chapter yet, what would that look like?",
+    "onboarding.q10.placeholder": "Paint the picture — even a rough sketch is fine."
   },
   fr: {
     "meta.title": "Vivelo — dessinez votre prochain chapitre",
     "index.hero.subtitle": "Une carte vivante de votre Raison d'être, vos Relations, votre Esprit et votre Corps — avec un assistant qui vous aide à trouver la suite.",
     "index.hero.cta": "Commencer",
-    "index.hero.helper": "Version de test privée pour recueillir vos premiers retours — merci de la tester."
+    "index.hero.helper": "Version de test privée pour recueillir vos premiers retours — merci de la tester.",
+
+    "onboarding.location.label": "Ville ou code postal",
+    "onboarding.location.placeholder": "ex. Chilliwack, BC ou V2R 1A1",
+    "onboarding.location.helper": "Nous aide à vous proposer des activités près de chez vous plus tard.",
+    "onboarding.progress": "Question {current} sur {total}",
+    "onboarding.back": "Retour",
+    "onboarding.skip": "Passer cette question",
+    "onboarding.next": "Suivant",
+    "onboarding.saving": "Enregistrement…",
+    "onboarding.thinking.title": "Un instant de réflexion…",
+    "onboarding.thinking.body": "Nous identifions les thèmes de ce que vous avez partagé. Cela prend environ 10 secondes.",
+    "onboarding.customPlaceholder": "Ajoutez le vôtre…",
+    "onboarding.customAdd": "Ajouter",
+
+    "onboarding.q1.text": "En repensant à votre vie, quelles activités vous ont procuré le plus grand sentiment de satisfaction?",
+    "onboarding.q1.placeholder": "Prenez votre temps — il n'y a pas de bonne réponse ici.",
+    "onboarding.q2.text": "Selon vous, quelles qualités personnelles les gens apprécient-ils le plus chez vous?",
+    "onboarding.q2.placeholder": "ex. être à l'écoute, faire preuve d'organisation, de patience…",
+    "onboarding.q3.text": "Quelles sont trois choses que vous aimeriez vivre ou accomplir au cours des cinq prochaines années?",
+    "onboarding.q3.placeholder": "Petites ou grandes — tout ce qui vous vient à l'esprit.",
+    "onboarding.q4.text": "Comment aimeriez-vous idéalement passer une journée libre et épanouissante?",
+    "onboarding.q4.placeholder": "Décrivez-la du début à la fin.",
+    "onboarding.q5.text": "Quelles activités appréciez-vous le plus en ce moment?",
+    "onboarding.q5.options": ["Lecture", "Marche", "Sport", "Bénévolat", "Voyage", "Arts", "Musique", "Apprentissage", "Événements sociaux"],
+    "onboarding.q6.text": "Comment décririez-vous votre vie sociale actuelle?",
+    "onboarding.q6.options": ["Très active", "Assez active", "Pourrait être meilleure", "Limitée", "Très isolée"],
+    "onboarding.q7.text": "Lequel de ces domaines aimeriez-vous le plus améliorer aujourd'hui?",
+    "onboarding.q7.options": ["Santé physique", "Apprendre de nouvelles choses", "Rencontrer des gens", "Trouver un sens à sa vie", "Profiter davantage de la vie"],
+    "onboarding.q8.text": "À quelle fréquence ressentez-vous de l'enthousiasme pour la semaine à venir?",
+    "onboarding.q8.options": ["Très souvent", "Souvent", "Parfois", "Rarement", "Jamais"],
+    "onboarding.q9.text": "Qu'est-ce qui vous empêche de faire davantage de ce que vous aimez?",
+    "onboarding.q9.options": ["Manque d'énergie", "Gestion du temps", "Confiance en soi", "Problèmes de santé", "Manque d'idées", "Manque de compagnie", "Motivation"],
+    "onboarding.q10.text": "Si la retraite pouvait devenir votre plus beau chapitre, à quoi ressemblerait-elle?",
+    "onboarding.q10.placeholder": "Dressez-en le portrait — même une esquisse suffit."
   }
 };
