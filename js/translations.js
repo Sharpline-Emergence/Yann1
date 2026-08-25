@@ -45,7 +45,17 @@ window.TRANSLATIONS = {
     "onboarding.q9.text": "What prevents you from doing more of the things you enjoy?",
     "onboarding.q9.options": ["Lack of energy", "Time management", "Confidence", "Health concerns", "Lack of ideas", "Lack of companionship", "Motivation"],
     "onboarding.q10.text": "If retirement could become your best chapter yet, what would that look like?",
-    "onboarding.q10.placeholder": "Paint the picture — even a rough sketch is fine."
+    "onboarding.q10.placeholder": "Paint the picture — even a rough sketch is fine.",
+
+    "login.subtitle": "Sign in to build your life map",
+    "login.email.label": "Email address",
+    "login.sendLink": "Send me a sign-in link",
+    "login.sending": "Sending…",
+    "login.passwordless.body": "No password to create or remember. We'll send a link straight to your email — just open the email and tap the link, and you're signed in automatically. It's completely safe, and only works from the email address you enter here.",
+    "login.sent.prefix": "Check your inbox — we sent a sign-in link to ",
+    "login.sent.suffix": ".",
+    "login.sent.body": "Open the email and tap the button inside it. That's it — no password, no code to type. It'll bring you right back here, already signed in.",
+    "login.errors.emptyEmail": "Enter your email first."
   },
   fr: {
     "meta.title": "Vivelo — dessinez votre prochain chapitre",
@@ -85,6 +95,16 @@ window.TRANSLATIONS = {
     "onboarding.q9.text": "Qu'est-ce qui vous empêche de faire davantage de ce que vous aimez?",
     "onboarding.q9.options": ["Manque d'énergie", "Gestion du temps", "Confiance en soi", "Problèmes de santé", "Manque d'idées", "Manque de compagnie", "Motivation"],
     "onboarding.q10.text": "Si la retraite pouvait devenir votre plus beau chapitre, à quoi ressemblerait-elle?",
-    "onboarding.q10.placeholder": "Dressez-en le portrait — même une esquisse suffit."
+    "onboarding.q10.placeholder": "Dressez-en le portrait — même une esquisse suffit.",
+
+    "login.subtitle": "Connectez-vous pour créer votre carte de vie",
+    "login.email.label": "Adresse courriel",
+    "login.sendLink": "Envoyez-moi un lien de connexion",
+    "login.sending": "Envoi en cours…",
+    "login.passwordless.body": "Aucun mot de passe à créer ou à retenir. Nous vous enverrons un lien directement par courriel — il suffit d'ouvrir le courriel et de toucher le lien pour être connecté automatiquement. C'est entièrement sécurisé, et cela fonctionne uniquement avec l'adresse courriel que vous indiquez ici.",
+    "login.sent.prefix": "Consultez votre boîte de réception — nous avons envoyé un lien de connexion à ",
+    "login.sent.suffix": ".",
+    "login.sent.body": "Ouvrez le courriel et touchez le bouton qu'il contient. C'est tout — aucun mot de passe, aucun code à saisir. Vous serez ramené ici, déjà connecté.",
+    "login.errors.emptyEmail": "Entrez d'abord votre adresse courriel."
   }
 };
