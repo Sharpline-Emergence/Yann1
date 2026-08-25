@@ -7,7 +7,7 @@
 //   3. Include translations.js THEN this file, before </body>.
 
 (function () {
-  const SUPPORTED_LANGS = Object.keys(TRANSLATIONS);
+  const SUPPORTED_LANGS = Object.keys(window.TRANSLATIONS);
   const DEFAULT_LANG = "en";
   const STORAGE_KEY = "vivelo_lang";
 
@@ -26,11 +26,17 @@
   }
 
   function applyTranslations(lang) {
-    const dict = TRANSLATIONS[lang] || TRANSLATIONS[DEFAULT_LANG];
+    const dict = window.TRANSLATIONS[lang] || window.TRANSLATIONS[DEFAULT_LANG];
 
     document.querySelectorAll("[data-i18n]").forEach(function (el) {
       const key = el.getAttribute("data-i18n");
-      if (dict[key]) el.textContent = dict[key];
+      if (typeof dict[key] === "string") el.textContent = dict[key];
+    });
+
+    // For <input placeholder="...">, <textarea placeholder="...">, etc.
+    document.querySelectorAll("[data-i18n-placeholder]").forEach(function (el) {
+      const key = el.getAttribute("data-i18n-placeholder");
+      if (typeof dict[key] === "string") el.placeholder = dict[key];
     });
 
     if (dict["meta.title"]) document.title = dict["meta.title"];
@@ -39,6 +45,11 @@
     document.querySelectorAll("[data-lang-toggle]").forEach(function (el) {
       el.classList.toggle("active", el.getAttribute("data-lang-toggle") === lang);
     });
+
+    // Lets pages with dynamically-generated content (e.g. onboarding.html,
+    // which builds question text via JS rather than static data-i18n tags)
+    // hook in and re-render themselves in the new language.
+    document.dispatchEvent(new CustomEvent("vivelo:langchange", { detail: { lang: lang } }));
   }
 
   function setLang(lang) {
