@@ -49,21 +49,28 @@
   .theme-list h3 { font-family: 'Fraunces', serif; font-size: 18px; margin-bottom: 10px; }
   .theme-list-item { display: flex; justify-content: space-between; gap: 12px; padding: 8px 0; border-bottom: 1px solid #eee; font-size: 14px; }
   .theme-list-item .tl-pillars { color: #888; font-size: 12.5px; white-space: nowrap; }
+  .lang-switch { position: absolute; top: 20px; right: 20px; display: flex; gap: 6px; font-size: 13px; }
+  .lang-switch a { color: #777; text-decoration: none; padding: 2px 6px; border-radius: 4px; }
+  .lang-switch a.active { color: inherit; font-weight: 600; background: rgba(0,0,0,0.05); }
 </style>
 </head>
-<body>
+<body data-i18n-title="dashboard.meta.title">
+<div class="lang-switch">
+  <a href="#" data-lang-toggle="en">EN</a>
+  <a href="#" data-lang-toggle="fr">FR</a>
+</div>
 <div class="wrap wide">
   <div class="topbar">
     <div class="brand">Vivelo</div>
-    <button class="signout" id="signout-btn">Sign out</button>
+    <button class="signout" id="signout-btn" data-i18n="dashboard.signout">Sign out</button>
   </div>
 
-  <h2>Your life map</h2>
-  <p class="helper-text" style="margin-bottom:12px;">Themes pulled from what you shared — position shows which pillars they connect.</p>
+  <h2 data-i18n="dashboard.title">Your life map</h2>
+  <p class="helper-text" style="margin-bottom:12px;" data-i18n="dashboard.subtitle">Themes pulled from what you shared — position shows which pillars they connect.</p>
 
   <div class="legend" id="legend"></div>
 
-  <div id="detail-panel"><span class="detail-hint">Tap any circle below to see what it is.</span></div>
+  <div id="detail-panel"><span class="detail-hint" data-i18n="dashboard.hint">Tap any circle below to see what it is.</span></div>
 
   <div id="map-wrap">
     <svg id="map-svg" viewBox="0 0 1100 1100" xmlns="http://www.w3.org/2000/svg"></svg>
@@ -72,15 +79,18 @@
   <div id="theme-list" class="theme-list"></div>
 
   <p id="empty-state" class="helper-text" style="display:none; text-align:center;">
-    No themes yet — <a href="onboarding.html">answer a few questions</a> to build your map.
+    <span data-i18n="dashboard.empty.prefix">No themes yet — </span><a href="onboarding.html" data-i18n="dashboard.empty.linkText">answer a few questions</a><span data-i18n="dashboard.empty.suffix"> to build your map.</span>
   </p>
 
   <div style="text-align:center;">
-    <a class="retake-link" href="onboarding.html">Retake the questionnaire →</a>
+    <a class="retake-link" href="onboarding.html" data-i18n="dashboard.retake">Retake the questionnaire →</a>
     <br>
-    <a class="retake-link" href="onboarding-module2.html">Go deeper — Module 2: Purpose (10 more questions) →</a>
+    <a class="retake-link" href="onboarding-module2.html" data-i18n="dashboard.module2Link">Go deeper — Module 2: Purpose (10 more questions) →</a>
   </div>
 </div>
+
+<script src="js/translations.js"></script>
+<script src="js/i18n.js"></script>
 
 <script type="module">
   import { supabase } from './js/supabase-client.js';
@@ -91,12 +101,21 @@
   const BIG_R = 260;
   const VIEW_SIZE = 1100;
 
+  function t(key) {
+    const lang = window.viveloI18n ? window.viveloI18n.currentLang() : 'en';
+    const dict = (window.TRANSLATIONS && window.TRANSLATIONS[lang]) || (window.TRANSLATIONS && window.TRANSLATIONS.en) || {};
+    return dict[key];
+  }
+
+  // Geometry/color are language-independent; the displayed name is resolved
+  // via labelKey at render time so it updates instantly on a language switch.
   const PILLARS = {
-    purpose:     { label: 'Purpose',     color: '#C49A2E', cx: CENTER.x,          cy: CENTER.y - OFFSET },
-    mind:        { label: 'Mind',        color: '#7B4FBB', cx: CENTER.x + OFFSET, cy: CENTER.y },
-    body:        { label: 'Body',        color: '#3D6B5E', cx: CENTER.x,          cy: CENTER.y + OFFSET },
-    connections: { label: 'Connections', color: '#3A7FC1', cx: CENTER.x - OFFSET, cy: CENTER.y },
+    purpose:     { labelKey: 'dashboard.pillar.purpose',     color: '#C49A2E', cx: CENTER.x,          cy: CENTER.y - OFFSET },
+    mind:        { labelKey: 'dashboard.pillar.mind',        color: '#7B4FBB', cx: CENTER.x + OFFSET, cy: CENTER.y },
+    body:        { labelKey: 'dashboard.pillar.body',        color: '#3D6B5E', cx: CENTER.x,          cy: CENTER.y + OFFSET },
+    connections: { labelKey: 'dashboard.pillar.connections', color: '#3A7FC1', cx: CENTER.x - OFFSET, cy: CENTER.y },
   };
+  function pillarLabel(p) { return t(p.labelKey); }
 
   document.getElementById('signout-btn').addEventListener('click', signOut);
 
@@ -105,10 +124,22 @@
   // Resets on page reload — no need to persist this anywhere.
   const VIEWED_THEMES = new Set();
 
-  // Legend
-  document.getElementById('legend').innerHTML = Object.values(PILLARS).map(p => `
-    <span class="legend-item"><span class="legend-dot" style="background:${p.color}"></span>${p.label}</span>
-  `).join('');
+  // Holds the last-loaded themes so a language switch can re-render the map
+  // and lists without a fresh Supabase fetch.
+  let currentThemes = null;
+
+  function renderLegend() {
+    document.getElementById('legend').innerHTML = Object.values(PILLARS).map(p => `
+      <span class="legend-item"><span class="legend-dot" style="background:${p.color}"></span>${pillarLabel(p)}</span>
+    `).join('');
+  }
+  renderLegend();
+
+  document.addEventListener('vivelo:langchange', () => {
+    renderLegend();
+    document.getElementById('detail-panel').innerHTML = hintHtml();
+    if (currentThemes) renderMap(currentThemes);
+  });
 
   async function loadDashboard() {
     const session = await requireSession();
@@ -136,6 +167,7 @@
       return;
     }
 
+    currentThemes = themes;
     renderMap(themes);
   }
 
@@ -206,15 +238,17 @@
     return nodes;
   }
 
-  const HINT_HTML = '<span class="detail-hint">Tap any circle below to see what it is.</span>';
+  function hintHtml() {
+    return `<span class="detail-hint">${t('dashboard.hint')}</span>`;
+  }
 
   function showDetail(theme) {
     const panel = document.getElementById('detail-panel');
-    const pillarNames = (theme.pillars || []).map(p => PILLARS[p]?.label || p).join(' · ');
+    const pillarNames = (theme.pillars || []).map(p => PILLARS[p] ? pillarLabel(PILLARS[p]) : p).join(' · ');
     panel.innerHTML = `
       <div class="detail-label">${escapeHtml(theme.label)}</div>
       <div class="detail-pillars">${escapeHtml(pillarNames)}</div>
-      <div class="detail-dismiss">tap to clear</div>
+      <div class="detail-dismiss">${t('dashboard.detail.dismiss')}</div>
     `;
     // Restart the flash animation even if it's already mid-run — removing
     // and re-adding the class alone won't retrigger CSS animations unless
@@ -229,7 +263,7 @@
   // the same place in the page (no fixed/floating positioning, so it can
   // never end up overlapping a pillar label at some window size again).
   document.getElementById('detail-panel').addEventListener('click', () => {
-    document.getElementById('detail-panel').innerHTML = HINT_HTML;
+    document.getElementById('detail-panel').innerHTML = hintHtml();
   });
 
   function escapeHtml(str) {
@@ -242,10 +276,10 @@
     const list = document.getElementById('theme-list');
     const sorted = [...themes].sort((a, b) => b.weight - a.weight);
     list.innerHTML = `
-      <h3>All your themes</h3>
-      ${sorted.map(t => {
-        const pillarNames = (t.pillars || []).map(p => PILLARS[p]?.label || p).join(' · ');
-        return `<div class="theme-list-item"><span>${escapeHtml(t.label)}</span><span class="tl-pillars">${escapeHtml(pillarNames)}</span></div>`;
+      <h3>${t('dashboard.themeList.heading')}</h3>
+      ${sorted.map(theme => {
+        const pillarNames = (theme.pillars || []).map(p => PILLARS[p] ? pillarLabel(PILLARS[p]) : p).join(' · ');
+        return `<div class="theme-list-item"><span>${escapeHtml(theme.label)}</span><span class="tl-pillars">${escapeHtml(pillarNames)}</span></div>`;
       }).join('')}
     `;
   }
@@ -282,7 +316,7 @@
       text.setAttribute('text-anchor', 'middle');
       text.setAttribute('class', 'pillar-label-text');
       text.setAttribute('fill', p.color);
-      text.textContent = p.label;
+      text.textContent = pillarLabel(p);
       svg.appendChild(text);
     });
 

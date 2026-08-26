@@ -26,18 +26,25 @@
   .q-nav { display: flex; justify-content: space-between; margin-top: 28px; }
   .q-skip { font-size: 13px; color: #999; background: none; border: none; cursor: pointer; text-decoration: underline; }
   .q-thinking { text-align: center; padding: 60px 20px; }
+  .lang-switch { position: absolute; top: 20px; right: 20px; display: flex; gap: 6px; font-size: 13px; }
+  .lang-switch a { color: #777; text-decoration: none; padding: 2px 6px; border-radius: 4px; }
+  .lang-switch a.active { color: inherit; font-weight: 600; background: rgba(0,0,0,0.05); }
 </style>
 </head>
-<body>
+<body data-i18n-title="onboarding.meta.title">
+<div class="lang-switch">
+  <a href="#" data-lang-toggle="en">EN</a>
+  <a href="#" data-lang-toggle="fr">FR</a>
+</div>
 <div class="wrap">
   <div class="q-wrap">
 
     <div class="card" style="margin-bottom:20px;">
       <div class="field" style="margin-bottom:0;">
-        <label for="location">City or postal code</label>
-        <input type="text" id="location" placeholder="e.g. Chilliwack, BC or V2R 1A1">
+        <label for="location" data-i18n="onboarding.location.label">City or postal code</label>
+        <input type="text" id="location" data-i18n-placeholder="onboarding.location.placeholder" placeholder="e.g. Chilliwack, BC or V2R 1A1">
       </div>
-      <p class="helper-text" style="margin-top:6px; margin-bottom:0;">Helps us suggest things happening near you later on.</p>
+      <p class="helper-text" style="margin-top:6px; margin-bottom:0;" data-i18n="onboarding.location.helper">Helps us suggest things happening near you later on.</p>
     </div>
 
     <div id="questionnaire">
@@ -48,86 +55,53 @@
 
       <div class="q-nav">
         <div>
-          <button class="btn btn-outline" id="backBtn" style="display:none;">Back</button>
+          <button class="btn btn-outline" id="backBtn" data-i18n="onboarding.back" style="display:none;">Back</button>
         </div>
         <div>
-          <button class="q-skip" id="skipBtn">Skip this one</button>
-          <button class="btn btn-primary" id="nextBtn" style="margin-left:12px;">Next</button>
+          <button class="q-skip" id="skipBtn" data-i18n="onboarding.skip">Skip this one</button>
+          <button class="btn btn-primary" id="nextBtn" data-i18n="onboarding.next" style="margin-left:12px;">Next</button>
         </div>
       </div>
       <p class="msg" id="msg"></p>
     </div>
 
     <div id="thinking" class="q-thinking" style="display:none;">
-      <h2 class="display">Thinking for a moment…</h2>
-      <p class="helper-text">We're finding the themes in what you shared. This takes about 10 seconds.</p>
+      <h2 class="display" data-i18n="onboarding.thinking.title">Thinking for a moment…</h2>
+      <p class="helper-text" data-i18n="onboarding.thinking.body">We're finding the themes in what you shared. This takes about 10 seconds.</p>
     </div>
 
   </div>
 </div>
 
+<script src="js/translations.js"></script>
+<script src="js/i18n.js"></script>
 <script type="module">
   import { supabase } from './js/supabase-client.js';
   import { requireSession } from './js/auth.js';
 
   const QUESTIONS = [
-    {
-      id: 'q1', type: 'text',
-      text: "Looking back at your life, what activities have given you the greatest sense of satisfaction?",
-      placeholder: "Take your time — there's no right answer here."
-    },
-    {
-      id: 'q2', type: 'text',
-      text: "What personal strengths do you believe people value most in you?",
-      placeholder: "e.g. being a good listener, staying organized, patience…"
-    },
-    {
-      id: 'q3', type: 'text',
-      text: "What are three things you'd like to experience or achieve in the next five years?",
-      placeholder: "Big or small — whatever comes to mind."
-    },
-    {
-      id: 'q4', type: 'text',
-      text: "How would you ideally spend a free and fulfilling day?",
-      placeholder: "Walk us through it, start to finish."
-    },
-    {
-      id: 'q5', type: 'chips',
-      text: "Which activities do you currently enjoy most?",
-      options: ['Reading', 'Walking', 'Sports', 'Volunteering', 'Travel', 'Arts', 'Music', 'Learning', 'Social events'],
-      allowCustom: true
-    },
-    {
-      id: 'q6', type: 'single',
-      text: "How would you describe your current social life?",
-      options: ['Very active', 'Active enough', 'Could be better', 'Limited', 'Very isolated']
-    },
-    {
-      id: 'q7', type: 'chips',
-      text: "Which of these areas would you most like to improve today?",
-      options: ['Physical health', 'Learning new things', 'Meeting people', 'Finding purpose', 'Enjoying life more'],
-      allowCustom: false
-    },
-    {
-      id: 'q8', type: 'single',
-      text: "How often do you currently feel excited about the week ahead?",
-      options: ['Very often', 'Often', 'Sometimes', 'Rarely', 'Never']
-    },
-    {
-      id: 'q9', type: 'chips',
-      text: "What prevents you from doing more of the things you enjoy?",
-      options: ['Lack of energy', 'Time management', 'Confidence', 'Health concerns', 'Lack of ideas', 'Lack of companionship', 'Motivation'],
-      allowCustom: true
-    },
-    {
-      id: 'q10', type: 'text',
-      text: "If retirement could become your best chapter yet, what would that look like?",
-      placeholder: "Paint the picture — even a rough sketch is fine."
-    },
+    { id: 'q1', type: 'text', textKey: 'onboarding.q1.text', placeholderKey: 'onboarding.q1.placeholder' },
+    { id: 'q2', type: 'text', textKey: 'onboarding.q2.text', placeholderKey: 'onboarding.q2.placeholder' },
+    { id: 'q3', type: 'text', textKey: 'onboarding.q3.text', placeholderKey: 'onboarding.q3.placeholder' },
+    { id: 'q4', type: 'text', textKey: 'onboarding.q4.text', placeholderKey: 'onboarding.q4.placeholder' },
+    { id: 'q5', type: 'chips', textKey: 'onboarding.q5.text', optionsKey: 'onboarding.q5.options', allowCustom: true },
+    { id: 'q6', type: 'single', textKey: 'onboarding.q6.text', optionsKey: 'onboarding.q6.options' },
+    { id: 'q7', type: 'chips', textKey: 'onboarding.q7.text', optionsKey: 'onboarding.q7.options', allowCustom: false },
+    { id: 'q8', type: 'single', textKey: 'onboarding.q8.text', optionsKey: 'onboarding.q8.options' },
+    { id: 'q9', type: 'chips', textKey: 'onboarding.q9.text', optionsKey: 'onboarding.q9.options', allowCustom: true },
+    { id: 'q10', type: 'text', textKey: 'onboarding.q10.text', placeholderKey: 'onboarding.q10.placeholder' },
   ];
+
+  // Looks up a translated string (or array, for option lists) for the active language.
+  function t(key) {
+    const lang = window.viveloI18n ? window.viveloI18n.currentLang() : 'en';
+    const dict = (window.TRANSLATIONS && window.TRANSLATIONS[lang]) || (window.TRANSLATIONS && window.TRANSLATIONS.en) || {};
+    return dict[key];
+  }
 
   const answers = {}; // q1..q10
   let current = 0;
+  let hasRenderedOnce = false;
 
   const qBody = document.getElementById('qBody');
   const progressLabel = document.getElementById('progressLabel');
@@ -137,17 +111,28 @@
   const skipBtn = document.getElementById('skipBtn');
   const msg = document.getElementById('msg');
 
+  // Re-render the current question (with new-language text) when the toggle is clicked.
+  // Guarded so the very first languagechange event (fired on page load, before the
+  // session/answers have loaded) doesn't trigger a redundant early render.
+  document.addEventListener('vivelo:langchange', () => {
+    if (hasRenderedOnce) render();
+  });
+
   function render() {
     const q = QUESTIONS[current];
-    progressLabel.textContent = `Question ${current + 1} of ${QUESTIONS.length}`;
+    const qText = t(q.textKey);
+    progressLabel.textContent = t('onboarding.progress')
+      .replace('{current}', current + 1)
+      .replace('{total}', QUESTIONS.length);
     progressFill.style.width = `${((current + 1) / QUESTIONS.length) * 100}%`;
     backBtn.style.display = current === 0 ? 'none' : 'inline-block';
     msg.textContent = '';
 
     if (q.type === 'text') {
+      const placeholder = t(q.placeholderKey);
       qBody.innerHTML = `
-        <div class="q-question">${q.text}</div>
-        <textarea class="q-textarea" id="qInput" placeholder="${q.placeholder}">${answers[q.id] || ''}</textarea>
+        <div class="q-question">${qText}</div>
+        <textarea class="q-textarea" id="qInput" placeholder="${placeholder}">${answers[q.id] || ''}</textarea>
       `;
       document.getElementById('qInput').addEventListener('input', e => {
         answers[q.id] = e.target.value;
@@ -155,16 +140,17 @@
     }
 
     if (q.type === 'chips') {
+      const options = t(q.optionsKey);
       const selected = new Set(answers[q.id] || []);
       qBody.innerHTML = `
-        <div class="q-question">${q.text}</div>
+        <div class="q-question">${qText}</div>
         <div class="q-chip-row" id="chipRow">
-          ${q.options.map(o => `<span class="q-chip${selected.has(o) ? ' active' : ''}" data-val="${o}">${o}</span>`).join('')}
+          ${options.map(o => `<span class="q-chip${selected.has(o) ? ' active' : ''}" data-val="${o}">${o}</span>`).join('')}
         </div>
         ${q.allowCustom ? `
           <div class="q-custom-row">
-            <input type="text" id="customChipInput" placeholder="Add your own…">
-            <button class="btn btn-outline" id="customChipAdd" type="button">Add</button>
+            <input type="text" id="customChipInput" placeholder="${t('onboarding.customPlaceholder')}">
+            <button class="btn btn-outline" id="customChipAdd" type="button">${t('onboarding.customAdd')}</button>
           </div>` : ''}
       `;
       const chipRow = document.getElementById('chipRow');
@@ -196,10 +182,11 @@
     }
 
     if (q.type === 'single') {
+      const options = t(q.optionsKey);
       qBody.innerHTML = `
-        <div class="q-question">${q.text}</div>
+        <div class="q-question">${qText}</div>
         <div class="q-single-row" id="singleRow">
-          ${q.options.map(o => `<button type="button" class="q-single-opt${answers[q.id] === o ? ' active' : ''}" data-val="${o}">${o}</button>`).join('')}
+          ${options.map(o => `<button type="button" class="q-single-opt${answers[q.id] === o ? ' active' : ''}" data-val="${o}">${o}</button>`).join('')}
         </div>
       `;
       document.getElementById('singleRow').querySelectorAll('.q-single-opt').forEach(btn => {
@@ -210,6 +197,8 @@
         });
       });
     }
+
+    hasRenderedOnce = true;
   }
 
   backBtn.addEventListener('click', () => { current--; render(); });
@@ -231,7 +220,7 @@
     const userId = session.user.id;
 
     nextBtn.disabled = true;
-    nextBtn.textContent = 'Saving…';
+    nextBtn.textContent = t('onboarding.saving');
 
     const location = document.getElementById('location').value.trim() || null;
     const { error: profileError } = await supabase
@@ -242,7 +231,7 @@
       msg.textContent = profileError.message;
       msg.className = 'msg error';
       nextBtn.disabled = false;
-      nextBtn.textContent = 'Next';
+      nextBtn.textContent = t('onboarding.next');
       return;
     }
 
@@ -254,7 +243,7 @@
       msg.textContent = saveError.message;
       msg.className = 'msg error';
       nextBtn.disabled = false;
-      nextBtn.textContent = 'Next';
+      nextBtn.textContent = t('onboarding.next');
       return;
     }
 
@@ -274,12 +263,12 @@
 
     // Replace any previous themes with this fresh extraction.
     await supabase.from('user_themes').delete().eq('user_id', userId);
-    const rows = data.themes.map(t => ({
+    const rows = data.themes.map(theme => ({
       user_id: userId,
-      label: t.label,
-      pillars: t.pillars,
-      weight: t.weight,
-      rationale: t.rationale || null,
+      label: theme.label,
+      pillars: theme.pillars,
+      weight: theme.weight,
+      rationale: theme.rationale || null,
     }));
     if (rows.length) await supabase.from('user_themes').insert(rows);
 

@@ -55,7 +55,27 @@ window.TRANSLATIONS = {
     "login.sent.prefix": "Check your inbox — we sent a sign-in link to ",
     "login.sent.suffix": ".",
     "login.sent.body": "Open the email and tap the button inside it. That's it — no password, no code to type. It'll bring you right back here, already signed in.",
-    "login.errors.emptyEmail": "Enter your email first."
+    "login.errors.emptyEmail": "Enter your email first.",
+
+    "login.meta.title": "Sign in — Vivelo",
+    "onboarding.meta.title": "Let's get to know you — Vivelo",
+    "dashboard.meta.title": "Your map — Vivelo",
+
+    "dashboard.signout": "Sign out",
+    "dashboard.title": "Your life map",
+    "dashboard.subtitle": "Themes pulled from what you shared — position shows which pillars they connect.",
+    "dashboard.hint": "Tap any circle below to see what it is.",
+    "dashboard.detail.dismiss": "tap to clear",
+    "dashboard.themeList.heading": "All your themes",
+    "dashboard.empty.prefix": "No themes yet — ",
+    "dashboard.empty.linkText": "answer a few questions",
+    "dashboard.empty.suffix": " to build your map.",
+    "dashboard.retake": "Retake the questionnaire →",
+    "dashboard.module2Link": "Go deeper — Module 2: Purpose (10 more questions) →",
+    "dashboard.pillar.purpose": "Purpose",
+    "dashboard.pillar.mind": "Mind",
+    "dashboard.pillar.body": "Body",
+    "dashboard.pillar.connections": "Connections"
   },
   fr: {
     "meta.title": "Vivelo — dessinez votre prochain chapitre",
@@ -105,6 +125,26 @@ window.TRANSLATIONS = {
     "login.sent.prefix": "Consultez votre boîte de réception — nous avons envoyé un lien de connexion à ",
     "login.sent.suffix": ".",
     "login.sent.body": "Ouvrez le courriel et touchez le bouton qu'il contient. C'est tout — aucun mot de passe, aucun code à saisir. Vous serez ramené ici, déjà connecté.",
-    "login.errors.emptyEmail": "Entrez d'abord votre adresse courriel."
+    "login.errors.emptyEmail": "Entrez d'abord votre adresse courriel.",
+
+    "login.meta.title": "Connexion — Vivelo",
+    "onboarding.meta.title": "Faisons connaissance — Vivelo",
+    "dashboard.meta.title": "Votre carte — Vivelo",
+
+    "dashboard.signout": "Se déconnecter",
+    "dashboard.title": "Votre carte de vie",
+    "dashboard.subtitle": "Des thèmes tirés de ce que vous avez partagé — leur position indique les piliers auxquels ils se rattachent.",
+    "dashboard.hint": "Touchez un cercle ci-dessous pour voir ce qu'il représente.",
+    "dashboard.detail.dismiss": "touchez pour effacer",
+    "dashboard.themeList.heading": "Tous vos thèmes",
+    "dashboard.empty.prefix": "Aucun thème pour l'instant — ",
+    "dashboard.empty.linkText": "répondez à quelques questions",
+    "dashboard.empty.suffix": " pour créer votre carte.",
+    "dashboard.retake": "Reprendre le questionnaire →",
+    "dashboard.module2Link": "Aller plus loin — Module 2 : Raison d'être (10 questions de plus) →",
+    "dashboard.pillar.purpose": "Raison d'être",
+    "dashboard.pillar.mind": "Esprit",
+    "dashboard.pillar.body": "Corps",
+    "dashboard.pillar.connections": "Relations"
   }
 };

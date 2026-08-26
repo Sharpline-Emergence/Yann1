@@ -39,7 +39,10 @@
       if (typeof dict[key] === "string") el.placeholder = dict[key];
     });
 
-    if (dict["meta.title"]) document.title = dict["meta.title"];
+    // Each page can declare its own title via <body data-i18n-title="key">.
+    // Pages that don't (index.html) fall back to the shared "meta.title" key.
+    const titleKey = (document.body && document.body.getAttribute('data-i18n-title')) || 'meta.title';
+    if (dict[titleKey]) document.title = dict[titleKey];
     document.documentElement.lang = lang;
 
     document.querySelectorAll("[data-lang-toggle]").forEach(function (el) {
