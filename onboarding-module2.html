@@ -22,14 +22,21 @@
     display: inline-block; background: #FEF3D0; color: #C49A2E; font-size: 12px;
     font-weight: 600; padding: 4px 12px; border-radius: 50px; margin-bottom: 14px;
   }
+  .lang-switch { position: absolute; top: 20px; right: 20px; display: flex; gap: 6px; font-size: 13px; }
+  .lang-switch a { color: #777; text-decoration: none; padding: 2px 6px; border-radius: 4px; }
+  .lang-switch a.active { color: inherit; font-weight: 600; background: rgba(0,0,0,0.05); }
 </style>
 </head>
-<body>
+<body data-i18n-title="onboarding2.meta.title">
+<div class="lang-switch">
+  <a href="#" data-lang-toggle="en">EN</a>
+  <a href="#" data-lang-toggle="fr">FR</a>
+</div>
 <div class="wrap">
   <div class="q-wrap">
 
     <div id="questionnaire">
-      <span class="module-badge">Module 2 · Purpose</span>
+      <span class="module-badge" data-i18n="onboarding2.badge">Module 2 · Purpose</span>
       <p class="q-progress-label" id="progressLabel">Question 1 of 10</p>
       <div class="q-progress-bar"><div class="q-progress-fill" id="progressFill" style="width:10%"></div></div>
 
@@ -37,45 +44,54 @@
 
       <div class="q-nav">
         <div>
-          <button class="btn btn-outline" id="backBtn" style="display:none;">Back</button>
+          <button class="btn btn-outline" id="backBtn" data-i18n="onboarding.back" style="display:none;">Back</button>
         </div>
         <div>
-          <button class="q-skip" id="skipBtn">Skip this one</button>
-          <button class="btn btn-primary" id="nextBtn" style="margin-left:12px;">Next</button>
+          <button class="q-skip" id="skipBtn" data-i18n="onboarding.skip">Skip this one</button>
+          <button class="btn btn-primary" id="nextBtn" data-i18n="onboarding.next" style="margin-left:12px;">Next</button>
         </div>
       </div>
       <p class="msg" id="msg"></p>
     </div>
 
     <div id="thinking" class="q-thinking" style="display:none;">
-      <h2 class="display">Refining your map…</h2>
-      <p class="helper-text">Weaving these answers into your themes. About 10 seconds.</p>
+      <h2 class="display" data-i18n="onboarding2.thinking.title">Refining your map…</h2>
+      <p class="helper-text" data-i18n="onboarding2.thinking.body">Weaving these answers into your themes. About 10 seconds.</p>
     </div>
 
   </div>
 </div>
 
+<script src="js/translations.js"></script>
+<script src="js/i18n.js"></script>
 <script type="module">
   import { supabase } from './js/supabase-client.js';
   import { requireSession } from './js/auth.js';
 
+  function t(key) {
+    const lang = window.viveloI18n ? window.viveloI18n.currentLang() : 'en';
+    const dict = (window.TRANSLATIONS && window.TRANSLATIONS[lang]) || (window.TRANSLATIONS && window.TRANSLATIONS.en) || {};
+    return dict[key];
+  }
+
   // Module 2 = Yann's "Pillar 1: PURPOSE" deep-dive set from his original
   // email. Stored under q11..q20 so Module 1's q1..q10 are never touched.
   const QUESTIONS = [
-    { id: 'q11', text: "What gives you the feeling that a day was well spent?", placeholder: "Whatever comes to mind first." },
-    { id: 'q12', text: "Do you currently feel you have a clear purpose?", placeholder: "Honest answer, however it comes out." },
-    { id: 'q13', text: "What activities make you lose track of time?", placeholder: "The things where you look up and an hour's gone." },
-    { id: 'q14', text: "What skills or knowledge would you still like to share with others?", placeholder: "Things you know that others might value." },
-    { id: 'q15', text: "Would you like to leave a legacy or make a contribution?", placeholder: "What that might look like, if anything." },
-    { id: 'q16', text: "What causes or topics matter most to you?", placeholder: "e.g. environment, education, family, community…" },
-    { id: 'q17', text: "When do you feel most useful?", placeholder: "A moment or situation that comes to mind." },
-    { id: 'q18', text: "What challenge would excite you in the next year?", placeholder: "Big or small." },
-    { id: 'q19', text: "If younger people asked for your advice, what could you teach them?", placeholder: "What you'd want them to know." },
-    { id: 'q20', text: "Complete this sentence: \"My life feels meaningful when…\"", placeholder: "Finish it however feels true." },
+    { id: 'q11', textKey: 'onboarding2.q11.text', placeholderKey: 'onboarding2.q11.placeholder' },
+    { id: 'q12', textKey: 'onboarding2.q12.text', placeholderKey: 'onboarding2.q12.placeholder' },
+    { id: 'q13', textKey: 'onboarding2.q13.text', placeholderKey: 'onboarding2.q13.placeholder' },
+    { id: 'q14', textKey: 'onboarding2.q14.text', placeholderKey: 'onboarding2.q14.placeholder' },
+    { id: 'q15', textKey: 'onboarding2.q15.text', placeholderKey: 'onboarding2.q15.placeholder' },
+    { id: 'q16', textKey: 'onboarding2.q16.text', placeholderKey: 'onboarding2.q16.placeholder' },
+    { id: 'q17', textKey: 'onboarding2.q17.text', placeholderKey: 'onboarding2.q17.placeholder' },
+    { id: 'q18', textKey: 'onboarding2.q18.text', placeholderKey: 'onboarding2.q18.placeholder' },
+    { id: 'q19', textKey: 'onboarding2.q19.text', placeholderKey: 'onboarding2.q19.placeholder' },
+    { id: 'q20', textKey: 'onboarding2.q20.text', placeholderKey: 'onboarding2.q20.placeholder' },
   ];
 
   const answers = {}; // q11..q20 — merged with existing q1..q10 on submit
   let current = 0;
+  let hasRenderedOnce = false;
 
   const qBody = document.getElementById('qBody');
   const progressLabel = document.getElementById('progressLabel');
@@ -85,20 +101,28 @@
   const skipBtn = document.getElementById('skipBtn');
   const msg = document.getElementById('msg');
 
+  document.addEventListener('vivelo:langchange', () => {
+    if (hasRenderedOnce) render();
+  });
+
   function render() {
     const q = QUESTIONS[current];
-    progressLabel.textContent = `Question ${current + 1} of ${QUESTIONS.length}`;
+    progressLabel.textContent = t('onboarding.progress')
+      .replace('{current}', current + 1)
+      .replace('{total}', QUESTIONS.length);
     progressFill.style.width = `${((current + 1) / QUESTIONS.length) * 100}%`;
     backBtn.style.display = current === 0 ? 'none' : 'inline-block';
     msg.textContent = '';
 
     qBody.innerHTML = `
-      <div class="q-question">${q.text}</div>
-      <textarea class="q-textarea" id="qInput" placeholder="${q.placeholder}">${answers[q.id] || ''}</textarea>
+      <div class="q-question">${t(q.textKey)}</div>
+      <textarea class="q-textarea" id="qInput" placeholder="${t(q.placeholderKey)}">${answers[q.id] || ''}</textarea>
     `;
     document.getElementById('qInput').addEventListener('input', e => {
       answers[q.id] = e.target.value;
     });
+
+    hasRenderedOnce = true;
   }
 
   backBtn.addEventListener('click', () => { current--; render(); });
@@ -120,7 +144,7 @@
     const userId = session.user.id;
 
     nextBtn.disabled = true;
-    nextBtn.textContent = 'Saving…';
+    nextBtn.textContent = t('onboarding.saving');
 
     // Merge with whatever's already saved (Module 1's q1..q10) rather than
     // overwriting — the theme extractor works best from the full answer set.
@@ -139,7 +163,7 @@
       msg.textContent = saveError.message;
       msg.className = 'msg error';
       nextBtn.disabled = false;
-      nextBtn.textContent = 'Next';
+      nextBtn.textContent = t('onboarding.next');
       return;
     }
 
@@ -147,7 +171,7 @@
     document.getElementById('thinking').style.display = 'block';
 
     const { data, error: fnError } = await supabase.functions.invoke('theme-extractor', {
-      body: { answers: mergedAnswers },
+      body: { answers: mergedAnswers, lang: window.viveloI18n ? window.viveloI18n.currentLang() : 'en' },
     });
 
     if (fnError || !data?.themes) {
@@ -157,12 +181,12 @@
 
     // Fresh extraction from the combined 20-answer set replaces the old themes.
     await supabase.from('user_themes').delete().eq('user_id', userId);
-    const rows = data.themes.map(t => ({
+    const rows = data.themes.map(theme => ({
       user_id: userId,
-      label: t.label,
-      pillars: t.pillars,
-      weight: t.weight,
-      rationale: t.rationale || null,
+      label: theme.label,
+      pillars: theme.pillars,
+      weight: theme.weight,
+      rationale: theme.rationale || null,
     }));
     if (rows.length) await supabase.from('user_themes').insert(rows);
 
