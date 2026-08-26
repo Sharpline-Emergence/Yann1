@@ -69,7 +69,7 @@
     btn.textContent = t('login.sending');
     msg.textContent = '';
 
-    const { error } = await sendMagicLink(email);
+    const { error } = await sendMagicLink(email, window.viveloI18n ? window.viveloI18n.currentLang() : 'en');
 
     if (error) {
       msg.textContent = error.message;

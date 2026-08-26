@@ -1,10 +1,15 @@
 import { supabase, SITE_URL } from './supabase-client.js';
 
 // Sends a magic link to the given email. Resolves { error } on failure.
-export async function sendMagicLink(email) {
+// `lang` is baked into the redirect URL so the language survives even if
+// the link is opened in a different browser/app than the one that sent it
+// (very common with email clients) — localStorage doesn't carry across
+// that boundary, but a URL query param does.
+export async function sendMagicLink(email, lang) {
+  const redirectTo = SITE_URL + 'onboarding.html' + (lang ? `?lang=${lang}` : '');
   return supabase.auth.signInWithOtp({
     email,
-    options: { emailRedirectTo: SITE_URL + 'onboarding.html' }
+    options: { emailRedirectTo: redirectTo }
   });
 }
 
