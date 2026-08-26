@@ -251,7 +251,7 @@
     document.getElementById('thinking').style.display = 'block';
 
     const { data, error: fnError } = await supabase.functions.invoke('theme-extractor', {
-      body: { answers },
+      body: { answers, lang: window.viveloI18n ? window.viveloI18n.currentLang() : 'en' },
     });
 
     if (fnError || !data?.themes) {
