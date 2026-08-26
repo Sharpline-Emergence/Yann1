@@ -19,9 +19,9 @@
     const saved = localStorage.getItem(STORAGE_KEY);
     if (saved && SUPPORTED_LANGS.includes(saved)) return saved;
 
-    const browserLang = (navigator.language || "").slice(0, 2);
-    if (SUPPORTED_LANGS.includes(browserLang)) return browserLang;
-
+    // No browser-locale auto-detection — new visitors always start on
+    // English (DEFAULT_LANG) and only switch via the toggle, a saved
+    // preference, or an explicit ?lang= link.
     return DEFAULT_LANG;
   }
 
