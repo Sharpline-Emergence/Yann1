@@ -14,6 +14,9 @@
     color: var(--sage); margin-bottom: 10px;
   }
   .intro-wrap h1 { font-size: 30px; margin-bottom: 18px; }
+  .pillar-graphic { display: flex; justify-content: center; margin: 8px 0 32px; }
+  .pillar-graphic svg { width: 220px; height: 220px; }
+  .pillar-caption { font-size: 13px; color: var(--ink-soft); margin-top: -20px; margin-bottom: 28px; }
   .step-list { text-align: left; margin: 28px 0; }
   .step-item {
     display: flex; gap: 14px; align-items: flex-start;
@@ -45,6 +48,20 @@
   <div class="intro-wrap">
     <div class="kicker" data-i18n="intro1.kicker">Three steps. No jargon.</div>
     <h1 class="display" data-i18n="intro1.title">From blank page to living plan</h1>
+
+    <div class="pillar-graphic">
+      <svg viewBox="0 0 220 220" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="110" cy="80" r="60" fill="var(--purpose)" opacity="0.55"/>
+        <circle cx="80" cy="110" r="60" fill="var(--connections)" opacity="0.55"/>
+        <circle cx="140" cy="110" r="60" fill="var(--mind)" opacity="0.55"/>
+        <circle cx="110" cy="140" r="60" fill="var(--body-pillar)" opacity="0.55"/>
+        <text x="110" y="24" text-anchor="middle" font-family="Fraunces, serif" font-size="12" font-weight="600" fill="var(--purpose)">Purpose</text>
+        <text x="18" y="112" text-anchor="middle" font-family="Fraunces, serif" font-size="12" font-weight="600" fill="var(--connections)">Connections</text>
+        <text x="202" y="112" text-anchor="middle" font-family="Fraunces, serif" font-size="12" font-weight="600" fill="var(--mind)">Mind</text>
+        <text x="110" y="204" text-anchor="middle" font-family="Fraunces, serif" font-size="12" font-weight="600" fill="var(--body-pillar)">Body</text>
+      </svg>
+    </div>
+    <p class="pillar-caption" data-i18n="intro1.graphicCaption">Four pillars, one map — themes appear where they overlap.</p>
 
     <div class="step-list">
       <div class="step-item">

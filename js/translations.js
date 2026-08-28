@@ -16,6 +16,7 @@ window.TRANSLATIONS = {
 
     "intro1.kicker": "Three steps. No jargon.",
     "intro1.title": "From blank page to living plan",
+    "intro1.graphicCaption": "Four pillars, one map — themes appear where they overlap.",
     "intro1.step1.title": "Tell us about yourself",
     "intro1.step1.desc": "A short set of questions about your strengths, interests, and wishes. About 3 minutes, no right or wrong answers.",
     "intro1.step2.title": "See your life map",
@@ -134,6 +135,7 @@ window.TRANSLATIONS = {
 
     "intro1.kicker": "Trois étapes. Sans jargon.",
     "intro1.title": "D'une page blanche à un plan de vie",
+    "intro1.graphicCaption": "Quatre piliers, une seule carte — les thèmes apparaissent là où ils se rejoignent.",
     "intro1.step1.title": "Parlez-nous de vous",
     "intro1.step1.desc": "Une courte série de questions sur vos forces, vos intérêts et vos souhaits. Environ 3 minutes, sans bonne ou mauvaise réponse.",
     "intro1.step2.title": "Découvrez votre carte de vie",
