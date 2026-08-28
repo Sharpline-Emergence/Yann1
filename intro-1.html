@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Vivelo — how it works</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@500;600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+<style>
+  .intro-wrap { text-align: center; padding: 48px 0 40px; }
+  .intro-wrap .kicker {
+    font-size: 13px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase;
+    color: var(--sage); margin-bottom: 10px;
+  }
+  .intro-wrap h1 { font-size: 30px; margin-bottom: 18px; }
+  .step-list { text-align: left; margin: 28px 0; }
+  .step-item {
+    display: flex; gap: 14px; align-items: flex-start;
+    padding: 16px 0; border-bottom: 1px solid var(--line);
+  }
+  .step-item:last-child { border-bottom: none; }
+  .step-num {
+    flex: 0 0 32px; height: 32px; border-radius: 50%;
+    background: var(--body-pillar-bg); color: var(--sage-dark);
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Fraunces', serif; font-weight: 600; font-size: 15px;
+  }
+  .step-text .step-title { font-weight: 600; margin-bottom: 2px; }
+  .step-text .step-desc { font-size: 15px; color: var(--ink-soft); }
+  .intro-nav { display: flex; flex-direction: column; gap: 12px; margin-top: 28px; }
+  .skip-link { text-align: center; font-size: 14px; color: var(--ink-soft); margin-top: 6px; }
+  .skip-link a { color: var(--ink-soft); text-decoration: underline; }
+  .lang-switch { position: absolute; top: 20px; right: 20px; display: flex; gap: 6px; font-size: 13px; }
+  .lang-switch a { color: var(--ink-soft); text-decoration: none; padding: 2px 6px; border-radius: 4px; }
+  .lang-switch a.active { color: inherit; font-weight: 600; background: rgba(0,0,0,0.05); }
+</style>
+</head>
+<body>
+<div class="lang-switch">
+  <a href="#" data-lang-toggle="en">EN</a>
+  <a href="#" data-lang-toggle="fr">FR</a>
+</div>
+<div class="wrap">
+  <div class="intro-wrap">
+    <div class="kicker" data-i18n="intro1.kicker">Three steps. No jargon.</div>
+    <h1 class="display" data-i18n="intro1.title">From blank page to living plan</h1>
+
+    <div class="step-list">
+      <div class="step-item">
+        <div class="step-num">1</div>
+        <div class="step-text">
+          <div class="step-title" data-i18n="intro1.step1.title">Tell us about yourself</div>
+          <div class="step-desc" data-i18n="intro1.step1.desc">A short set of questions about your strengths, interests, and wishes. About 3 minutes, no right or wrong answers.</div>
+        </div>
+      </div>
+      <div class="step-item">
+        <div class="step-num">2</div>
+        <div class="step-text">
+          <div class="step-title" data-i18n="intro1.step2.title">See your life map</div>
+          <div class="step-desc" data-i18n="intro1.step2.desc">Vivelo builds a visual map across four pillars — not a score or a grade, something to build from.</div>
+        </div>
+      </div>
+      <div class="step-item">
+        <div class="step-num">3</div>
+        <div class="step-text">
+          <div class="step-title" data-i18n="intro1.step3.title">Get a plan that fits</div>
+          <div class="step-desc" data-i18n="intro1.step3.desc">Choose a pillar to focus on and get activities matched to your pace.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="intro-nav">
+      <a href="intro-2.html" class="btn btn-primary" data-i18n="intro1.cta">See a preview</a>
+      <a href="login.html" class="btn btn-ghost" data-i18n="intro1.ctaSkipAhead">Skip ahead to sign up</a>
+    </div>
+    <p class="skip-link" data-i18n="intro1.skipNote">You can always come back to this later.</p>
+  </div>
+</div>
+<script src="js/translations.js"></script>
+<script src="js/i18n.js"></script>
+<script>
+  // Mark the intro as seen so it's not shown again on repeat visits.
+  localStorage.setItem('vivelo_intro_seen', '1');
+</script>
+</body>
+</html>

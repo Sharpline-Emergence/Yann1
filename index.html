@@ -15,6 +15,8 @@
   .lang-switch { position: absolute; top: 20px; right: 20px; display: flex; gap: 6px; font-size: 13px; }
   .lang-switch a { color: var(--ink-soft); text-decoration: none; padding: 2px 6px; border-radius: 4px; }
   .lang-switch a.active { color: inherit; font-weight: 600; background: rgba(0,0,0,0.05); }
+  .existing-client-link { margin-top: 16px; font-size: 15px; }
+  .existing-client-link a { color: var(--ink-soft); text-decoration: underline; }
 </style>
 </head>
 <body>
@@ -32,7 +34,10 @@
     </div>
     <h1 class="display">Vivelo</h1>
     <p data-i18n="index.hero.subtitle">A living map of your Purpose, Connections, Mind, and Body — with an assistant that helps you find what's next.</p>
-    <a href="login.html" class="btn btn-primary" data-i18n="index.hero.cta">Get started</a>
+    <a href="intro-1.html" class="btn btn-primary" data-i18n="index.hero.cta">Get started</a>
+    <p class="existing-client-link">
+      <a href="login.html" data-i18n="index.hero.existingClient">Already have an account? Sign in</a>
+    </p>
   </div>
   <p class="helper-text" data-i18n="index.hero.helper">Private test build for early feedback — thanks for trying it out.</p>
 </div>

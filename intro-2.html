@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Vivelo — a look at your first questions</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@500;600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+<style>
+  .intro-wrap { text-align: center; padding: 48px 0 40px; }
+  .intro-wrap .kicker {
+    font-size: 13px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase;
+    color: var(--sage); margin-bottom: 10px;
+  }
+  .intro-wrap h1 { font-size: 28px; margin-bottom: 24px; }
+  .preview-card { text-align: left; margin-bottom: 28px; }
+  .preview-card .field-label { font-size: 13px; font-weight: 600; color: var(--ink-soft); margin-bottom: 6px; }
+  .preview-card .field-value {
+    border: 1px solid var(--line); border-radius: var(--radius-sm);
+    padding: 12px 14px; background: var(--bg); font-size: 16px; margin-bottom: 20px;
+  }
+  .preview-card .question { font-family: 'Fraunces', serif; font-size: 18px; margin-bottom: 12px; }
+  .preview-card .option {
+    border: 1px solid var(--line); border-radius: var(--radius-sm);
+    padding: 12px 14px; margin-bottom: 8px; font-size: 15px;
+  }
+  .preview-card .option.selected { border-color: var(--sage); background: var(--body-pillar-bg); color: var(--sage-dark); }
+  .intro-nav { display: flex; flex-direction: column; gap: 12px; margin-top: 8px; }
+  .skip-link { text-align: center; font-size: 14px; color: var(--ink-soft); margin-top: 6px; }
+  .skip-link a { color: var(--ink-soft); text-decoration: underline; }
+  .lang-switch { position: absolute; top: 20px; right: 20px; display: flex; gap: 6px; font-size: 13px; }
+  .lang-switch a { color: var(--ink-soft); text-decoration: none; padding: 2px 6px; border-radius: 4px; }
+  .lang-switch a.active { color: inherit; font-weight: 600; background: rgba(0,0,0,0.05); }
+</style>
+</head>
+<body>
+<div class="lang-switch">
+  <a href="#" data-lang-toggle="en">EN</a>
+  <a href="#" data-lang-toggle="fr">FR</a>
+</div>
+<div class="wrap">
+  <div class="intro-wrap">
+    <div class="kicker" data-i18n="intro2.kicker">Get to know me</div>
+    <h1 class="display" data-i18n="intro2.title">A few gentle questions to start</h1>
+
+    <div class="card preview-card">
+      <div class="field-label" data-i18n="onboarding.location.label">City or postal code</div>
+      <div class="field-value">Chilliwack</div>
+
+      <div class="question" data-i18n="onboarding.q6.text">How would you describe your current social life?</div>
+      <div class="option" data-i18n="intro2.opt.veryActive">Very active</div>
+      <div class="option" data-i18n="intro2.opt.activeEnough">Active enough</div>
+      <div class="option" data-i18n="intro2.opt.couldBeBetter">Could be better</div>
+      <div class="option selected" data-i18n="intro2.opt.limited">Limited</div>
+      <div class="option" data-i18n="intro2.opt.veryIsolated">Very isolated</div>
+    </div>
+
+    <div class="intro-nav">
+      <a href="login.html" class="btn btn-primary" data-i18n="intro2.cta">Sign up and start</a>
+      <a href="intro-1.html" class="btn btn-ghost" data-i18n="intro2.back">Back</a>
+    </div>
+  </div>
+</div>
+<script src="js/translations.js"></script>
+<script src="js/i18n.js"></script>
+</body>
+</html>
