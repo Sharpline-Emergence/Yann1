@@ -12,18 +12,40 @@
   .hero p { color: var(--ink-soft); font-size: 16px; max-width: 360px; margin: 0 auto 28px; }
   .dots { display: flex; justify-content: center; gap: 10px; margin-bottom: 32px; }
   .dots span { width: 14px; height: 14px; border-radius: 50%; display: inline-block; }
-  .lang-switch { position: absolute; top: 20px; right: 20px; display: flex; gap: 6px; font-size: 13px; }
-  .lang-switch a { color: var(--ink-soft); text-decoration: none; padding: 2px 6px; border-radius: 4px; }
-  .lang-switch a.active { color: inherit; font-weight: 600; background: rgba(0,0,0,0.05); }
+  .lang-switch {
+    position: absolute; top: 20px; right: 20px;
+    display: flex; align-items: center; gap: 10px;
+    font-size: 16px;
+    background: var(--white);
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    padding: 8px 14px;
+    box-shadow: var(--shadow);
+  }
+  .lang-switch .lang-label {
+    font-size: 13px; color: var(--ink-soft); white-space: nowrap;
+  }
+  .lang-switch a {
+    color: var(--ink-soft); text-decoration: none; padding: 4px 10px;
+    border-radius: var(--radius-sm); font-weight: 600;
+  }
+  .lang-switch a.active { color: var(--white); background: var(--sage); }
+  @media (max-width: 420px) {
+    .lang-switch { top: 12px; right: 12px; padding: 6px 10px; gap: 6px; }
+    .lang-switch .lang-label { display: none; }
+  }
   .existing-client-link { margin-top: 16px; font-size: 15px; }
   .existing-client-link a { color: var(--ink-soft); text-decoration: underline; }
 </style>
 </head>
 <body>
-<div class="lang-switch">
-  <a href="#" data-lang-toggle="en">EN</a>
-  <a href="#" data-lang-toggle="fr">FR</a>
-</div>
+<!-- Populated by script below from window.TRANSLATIONS, so adding a
+     language to translations.js is the only step needed — no HTML edit.
+     NOTE for future-you/Yann: this pill-row layout is designed for 2
+     languages. Once a 3rd language is added, revisit — a dropdown/select
+     will likely read better than a growing row of pills, especially on
+     mobile where the bilingual label already hides below 420px. -->
+<div class="lang-switch" id="langSwitch"></div>
 <div class="wrap center">
   <div class="hero">
     <div class="dots">
@@ -42,6 +64,38 @@
   <p class="helper-text" data-i18n="index.hero.helper">Private test build for early feedback — thanks for trying it out.</p>
 </div>
 <script src="js/translations.js"></script>
+<script>
+  // Native display name + short code for each language TRANSLATIONS
+  // supports. Add an entry here when a new language block is added to
+  // translations.js — this is the only other place that needs it.
+  var LANG_META = {
+    en: { code: "EN", name: "English" },
+    fr: { code: "FR", name: "Français" }
+  };
+
+  (function buildLangSwitch() {
+    var langs = Object.keys(window.TRANSLATIONS);
+    var el = document.getElementById('langSwitch');
+
+    // Bilingual label reads naturally for 2 languages ("English / Français");
+    // for 3+ it falls back to a neutral "Language" label rather than an
+    // ever-growing slash-separated string.
+    var label = document.createElement('span');
+    label.className = 'lang-label';
+    label.textContent = langs.length <= 2
+      ? langs.map(function (l) { return (LANG_META[l] && LANG_META[l].name) || l; }).join(' / ')
+      : 'Language';
+    el.appendChild(label);
+
+    langs.forEach(function (l) {
+      var a = document.createElement('a');
+      a.href = '#';
+      a.setAttribute('data-lang-toggle', l);
+      a.textContent = (LANG_META[l] && LANG_META[l].code) || l.toUpperCase();
+      el.appendChild(a);
+    });
+  })();
+</script>
 <script src="js/i18n.js"></script>
 </body>
 </html>
