@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Vivelo — a look at your first questions</title>
+<title>Vivelo — a quick preview</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@500;600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/style.css">
@@ -13,25 +13,59 @@
     font-size: 13px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase;
     color: var(--sage); margin-bottom: 10px;
   }
-  .intro-wrap h1 { font-size: 28px; margin-bottom: 24px; }
-  .preview-card { text-align: left; margin-bottom: 28px; }
-  .preview-card .field-label { font-size: 13px; font-weight: 600; color: var(--ink-soft); margin-bottom: 6px; }
-  .preview-card .field-value {
-    border: 1px solid var(--line); border-radius: var(--radius-sm);
-    padding: 12px 14px; background: var(--bg); font-size: 16px; margin-bottom: 20px;
+  .intro-wrap h1 { font-size: 28px; margin-bottom: 8px; }
+  .demo-note { font-size: 13px; color: var(--ink-soft); margin-bottom: 28px; }
+
+  /* progress */
+  .progress-track {
+    height: 6px; border-radius: 999px; background: var(--line);
+    overflow: hidden; margin-bottom: 8px;
   }
-  .preview-card .question { font-family: 'Fraunces', serif; font-size: 18px; margin-bottom: 12px; }
-  .preview-card .option {
-    border: 1px solid var(--line); border-radius: var(--radius-sm);
-    padding: 12px 14px; margin-bottom: 8px; font-size: 15px;
+  .progress-fill {
+    height: 100%; background: var(--sage); border-radius: 999px;
+    transition: width 0.3s ease;
   }
-  .preview-card .option.selected { border-color: var(--sage); background: var(--body-pillar-bg); color: var(--sage-dark); }
+  .progress-label { font-size: 13px; color: var(--ink-soft); margin-bottom: 24px; text-align: right; }
+
+  /* question card */
+  .question-card { text-align: left; }
+  .question-card .question {
+    font-family: 'Fraunces', serif; font-size: 19px; margin-bottom: 16px;
+  }
+  .option {
+    border: 1px solid var(--line); border-radius: var(--radius-sm);
+    padding: 13px 16px; margin-bottom: 10px; font-size: 15px;
+    cursor: pointer; background: var(--white); transition: border-color 0.15s, background 0.15s, color 0.15s;
+  }
+  .option:hover { border-color: var(--sage); }
+  .option.selected { border-color: var(--sage); background: var(--body-pillar-bg); color: var(--sage-dark); }
+  .back-link { text-align: center; font-size: 14px; color: var(--ink-soft); margin-top: 18px; }
+  .back-link a { color: var(--ink-soft); text-decoration: underline; cursor: pointer; }
+
+  /* summary */
+  .summary-card { text-align: center; }
+  .pillar-graphic { display: flex; justify-content: center; margin: 8px 0 20px; }
+  .pillar-graphic svg { width: 240px; height: 220px; }
+  .pillar-graphic circle, .pillar-graphic text { transition: r 0.6s ease, opacity 0.6s ease; }
+  .summary-text {
+    font-size: 16px; line-height: 1.5; max-width: 380px; margin: 0 auto 24px;
+  }
+  .theme-chips { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; margin-bottom: 8px; }
+  .theme-chip {
+    display: inline-block; font-size: 13px; font-weight: 600;
+    padding: 6px 12px; border-radius: 999px; border: 1px solid var(--line);
+    background: var(--white);
+  }
+  .chips-caption { font-size: 12px; color: var(--ink-soft); margin-bottom: 28px; }
+
   .intro-nav { display: flex; flex-direction: column; gap: 12px; margin-top: 8px; }
   .skip-link { text-align: center; font-size: 14px; color: var(--ink-soft); margin-top: 6px; }
-  .skip-link a { color: var(--ink-soft); text-decoration: underline; }
+  .skip-link a { color: var(--ink-soft); text-decoration: underline; cursor: pointer; }
   .lang-switch { position: absolute; top: 20px; right: 20px; display: flex; gap: 6px; font-size: 13px; }
   .lang-switch a { color: var(--ink-soft); text-decoration: none; padding: 2px 6px; border-radius: 4px; }
   .lang-switch a.active { color: inherit; font-weight: 600; background: rgba(0,0,0,0.05); }
+
+  [hidden] { display: none !important; }
 </style>
 </head>
 <body>
@@ -43,26 +77,287 @@
   <div class="intro-wrap">
     <div class="kicker" data-i18n="intro2.kicker">Get to know me</div>
     <h1 class="display" data-i18n="intro2.title">A few gentle questions to start</h1>
+    <p class="demo-note" data-i18n="intro2.demoNote">Just a quick preview — nothing you answer here is saved.</p>
 
-    <div class="card preview-card">
-      <div class="field-label" data-i18n="onboarding.location.label">City or postal code</div>
-      <div class="field-value">Chilliwack</div>
+    <!-- QUESTION STEP -->
+    <div id="quizStep">
+      <div class="progress-track"><div class="progress-fill" id="progressFill" style="width: 20%;"></div></div>
+      <div class="progress-label" id="progressLabel">Question 1 of 5</div>
 
-      <div class="question" data-i18n="onboarding.q6.text">How would you describe your current social life?</div>
-      <div class="option" data-i18n="intro2.opt.veryActive">Very active</div>
-      <div class="option" data-i18n="intro2.opt.activeEnough">Active enough</div>
-      <div class="option" data-i18n="intro2.opt.couldBeBetter">Could be better</div>
-      <div class="option selected" data-i18n="intro2.opt.limited">Limited</div>
-      <div class="option" data-i18n="intro2.opt.veryIsolated">Very isolated</div>
+      <div class="card question-card">
+        <div class="question" id="questionText"></div>
+        <div id="optionsList"></div>
+      </div>
+
+      <div class="back-link" id="backLinkWrap" hidden>
+        <a id="backLink" data-i18n="intro2.back">Back</a>
+      </div>
     </div>
 
-    <div class="intro-nav">
-      <a href="login.html" class="btn btn-primary" data-i18n="intro2.cta">Sign up and start</a>
-      <a href="intro-1.html" class="btn btn-ghost" data-i18n="intro2.back">Back</a>
+    <!-- SUMMARY STEP -->
+    <div id="summaryStep" hidden>
+      <div class="card summary-card">
+        <div class="pillar-graphic">
+          <svg id="pillarSvg" viewBox="0 0 260 220" xmlns="http://www.w3.org/2000/svg">
+            <circle id="circle-purpose" cx="130" cy="80" r="60" fill="var(--purpose)" opacity="0.55"/>
+            <circle id="circle-connections" cx="100" cy="110" r="60" fill="var(--connections)" opacity="0.55"/>
+            <circle id="circle-mind" cx="160" cy="110" r="60" fill="var(--mind)" opacity="0.55"/>
+            <circle id="circle-body" cx="130" cy="140" r="60" fill="var(--body-pillar)" opacity="0.55"/>
+            <text x="130" y="24" text-anchor="middle" font-family="Fraunces, serif" font-size="12" font-weight="600" fill="var(--purpose)" data-i18n="pillar.purpose">Purpose</text>
+            <text x="30" y="112" text-anchor="middle" font-family="Fraunces, serif" font-size="12" font-weight="600" fill="var(--connections)" data-i18n="pillar.connections">Connections</text>
+            <text x="230" y="112" text-anchor="middle" font-family="Fraunces, serif" font-size="12" font-weight="600" fill="var(--mind)" data-i18n="pillar.mind">Mind</text>
+            <text x="130" y="204" text-anchor="middle" font-family="Fraunces, serif" font-size="12" font-weight="600" fill="var(--body-pillar)" data-i18n="pillar.body">Body</text>
+          </svg>
+        </div>
+
+        <p class="summary-text" id="summaryText"></p>
+
+        <div class="theme-chips" id="themeChips"></div>
+        <p class="chips-caption" data-i18n="intro2.chipsCaption">Illustrative examples — your real map is more specific, and only appears once you sign up.</p>
+      </div>
+
+      <div class="intro-nav">
+        <a href="login.html" class="btn btn-primary" data-i18n="intro2.cta">Sign up and start</a>
+        <a id="retakeLink" class="btn btn-ghost" data-i18n="intro2.retake">Try it again</a>
+      </div>
     </div>
+
+    <p class="skip-link"><a href="intro-1.html" data-i18n="intro2.backToIntro">Back</a></p>
   </div>
 </div>
 <script src="js/translations.js"></script>
 <script src="js/i18n.js"></script>
+<script>
+(function () {
+  // ---------------------------------------------------------------
+  // Demo-only preview. Nothing here is written to Supabase or
+  // localStorage — answers exist only in memory for this page view
+  // and are discarded on reload/navigation.
+  // ---------------------------------------------------------------
+
+  var PILLAR_ORDER = ['purpose', 'connections', 'mind', 'body'];
+
+  var QUESTIONS = [
+    {
+      pillar: 'purpose',
+      textKey: 'intro2.q1.text',
+      text: 'Which of these feels closest to how your days feel right now?',
+      options: [
+        { key: 'intro2.q1.opt1', text: 'Full of purpose and direction', value: 5 },
+        { key: 'intro2.q1.opt2', text: 'Pretty good, mostly', value: 4 },
+        { key: 'intro2.q1.opt3', text: "It's okay, nothing special", value: 3 },
+        { key: 'intro2.q1.opt4', text: 'A bit adrift lately', value: 2 },
+        { key: 'intro2.q1.opt5', text: 'Honestly, quite lost', value: 1 }
+      ]
+    },
+    {
+      pillar: 'connections',
+      textKey: 'onboarding.q6.text',
+      text: 'How would you describe your current social life?',
+      options: [
+        { key: 'intro2.opt.veryActive', text: 'Very active', value: 5 },
+        { key: 'intro2.opt.activeEnough', text: 'Active enough', value: 4 },
+        { key: 'intro2.opt.couldBeBetter', text: 'Could be better', value: 3 },
+        { key: 'intro2.opt.limited', text: 'Limited', value: 2 },
+        { key: 'intro2.opt.veryIsolated', text: 'Very isolated', value: 1 }
+      ]
+    },
+    {
+      pillar: 'mind',
+      textKey: 'intro2.q3.text',
+      text: 'How much are you learning or being mentally challenged these days?',
+      options: [
+        { key: 'intro2.q3.opt1', text: 'A lot, all the time', value: 5 },
+        { key: 'intro2.q3.opt2', text: 'A fair amount', value: 4 },
+        { key: 'intro2.q3.opt3', text: 'Some, now and then', value: 3 },
+        { key: 'intro2.q3.opt4', text: 'Not much', value: 2 },
+        { key: 'intro2.q3.opt5', text: 'Barely at all', value: 1 }
+      ]
+    },
+    {
+      pillar: 'body',
+      textKey: 'intro2.q4.text',
+      text: 'How would you describe your energy and physical activity lately?',
+      options: [
+        { key: 'intro2.q4.opt1', text: 'Strong and active', value: 5 },
+        { key: 'intro2.q4.opt2', text: 'Pretty good', value: 4 },
+        { key: 'intro2.q4.opt3', text: 'So-so', value: 3 },
+        { key: 'intro2.q4.opt4', text: 'Low energy', value: 2 },
+        { key: 'intro2.q4.opt5', text: 'Struggling', value: 1 }
+      ]
+    },
+    {
+      pillar: null, // wildcard — contributes +1 to whichever pillar is picked
+      textKey: 'intro2.q5.text',
+      text: 'If you had one extra free afternoon a week, what would you do with it?',
+      options: [
+        { key: 'intro2.q5.opt.purpose', text: 'Start or work on something meaningful', pillarPick: 'purpose' },
+        { key: 'intro2.q5.opt.connections', text: 'Spend it with people I care about', pillarPick: 'connections' },
+        { key: 'intro2.q5.opt.mind', text: 'Learn something new or read', pillarPick: 'mind' },
+        { key: 'intro2.q5.opt.body', text: 'Get outside and move', pillarPick: 'body' }
+      ]
+    }
+  ];
+
+  var THEME_EXAMPLES = {
+    purpose: ['Meaningful work', 'Creative projects', 'Mentorship'],
+    connections: ['Old friendships', 'New community', 'Family closeness'],
+    mind: ['Lifelong learning', 'Creative hobbies', 'Mental sharpness'],
+    body: ['Active mornings', 'Outdoor time', 'Better sleep']
+  };
+
+  var SUMMARY_TEMPLATES = {
+    // top pillar strength, grow pillar opportunity
+    strength: {
+      purpose: 'a real sense of {top} — direction, meaning, something to work toward.',
+      connections: 'strong {top} — the people and community around you.',
+      mind: 'active {top} — curiosity and mental sharpness.',
+      body: 'good {top} — energy and how your body feels day to day.'
+    }
+  };
+
+  function t(key, fallback) {
+    // Uses the site's existing i18n lookup if present, otherwise falls
+    // back to the English string baked into this file.
+    if (window.i18nLookup && typeof window.i18nLookup === 'function') {
+      var v = window.i18nLookup(key);
+      if (v) return v;
+    }
+    return fallback;
+  }
+
+  var current = 0;
+  var scores = { purpose: 0, connections: 0, mind: 0, body: 0 };
+  var answerHistory = []; // in-memory only, for the Back button
+
+  var quizStep = document.getElementById('quizStep');
+  var summaryStep = document.getElementById('summaryStep');
+  var progressFill = document.getElementById('progressFill');
+  var progressLabel = document.getElementById('progressLabel');
+  var questionText = document.getElementById('questionText');
+  var optionsList = document.getElementById('optionsList');
+  var backLinkWrap = document.getElementById('backLinkWrap');
+  var backLink = document.getElementById('backLink');
+
+  function renderQuestion() {
+    var q = QUESTIONS[current];
+    progressFill.style.width = (((current) / QUESTIONS.length) * 100 + 5) + '%';
+    progressLabel.textContent = 'Question ' + (current + 1) + ' of ' + QUESTIONS.length;
+    questionText.textContent = t(q.textKey, q.text);
+    questionText.setAttribute('data-i18n', q.textKey);
+
+    optionsList.innerHTML = '';
+    q.options.forEach(function (opt) {
+      var div = document.createElement('div');
+      div.className = 'option';
+      div.setAttribute('data-i18n', opt.key);
+      div.textContent = t(opt.key, opt.text);
+      div.addEventListener('click', function () { selectOption(opt, div); });
+      optionsList.appendChild(div);
+    });
+
+    backLinkWrap.hidden = current === 0;
+  }
+
+  function selectOption(opt, el) {
+    // brief visual confirmation before advancing
+    Array.prototype.forEach.call(optionsList.children, function (c) { c.classList.remove('selected'); });
+    el.classList.add('selected');
+
+    var q = QUESTIONS[current];
+    var record = { pillar: q.pillar, opt: opt };
+    if (q.pillar) {
+      scores[q.pillar] += opt.value;
+    } else if (opt.pillarPick) {
+      scores[opt.pillarPick] += 1;
+    }
+    answerHistory.push(record);
+
+    setTimeout(function () {
+      current += 1;
+      if (current >= QUESTIONS.length) {
+        showSummary();
+      } else {
+        renderQuestion();
+      }
+    }, 320);
+  }
+
+  backLink.addEventListener('click', function () {
+    if (current === 0) return;
+    current -= 1;
+    var last = answerHistory.pop();
+    if (last) {
+      if (last.pillar) {
+        scores[last.pillar] -= last.opt.value;
+      } else if (last.opt.pillarPick) {
+        scores[last.opt.pillarPick] -= 1;
+      }
+    }
+    renderQuestion();
+  });
+
+  function pillarLabel(p) {
+    return t('pillar.' + p, p.charAt(0).toUpperCase() + p.slice(1));
+  }
+
+  function showSummary() {
+    quizStep.hidden = true;
+    summaryStep.hidden = false;
+
+    var sorted = PILLAR_ORDER.slice().sort(function (a, b) { return scores[b] - scores[a]; });
+    var top = sorted[0];
+    var grow = sorted[sorted.length - 1];
+
+    // resize/emphasize circles based on demo answers (illustrative only —
+    // this is not the real theme-extraction geometry used post-signup)
+    PILLAR_ORDER.forEach(function (p) {
+      var circle = document.getElementById('circle-' + p);
+      if (p === top) {
+        circle.setAttribute('r', '74');
+        circle.setAttribute('opacity', '0.75');
+      } else if (p === grow) {
+        circle.setAttribute('r', '50');
+        circle.setAttribute('opacity', '0.35');
+      } else {
+        circle.setAttribute('r', '60');
+        circle.setAttribute('opacity', '0.55');
+      }
+    });
+
+    var summaryTemplate = t(
+      'intro2.summary.template',
+      'From what you shared, {top} feels like {strength} {grow} looks like where Vivelo could help you find more of what you want.'
+    );
+    var strengthPhrase = SUMMARY_TEMPLATES.strength[top].replace('{top}', pillarLabel(top).toLowerCase());
+    var summaryText = summaryTemplate
+      .replace('{top}', pillarLabel(top))
+      .replace('{strength}', strengthPhrase)
+      .replace('{grow}', pillarLabel(grow));
+    document.getElementById('summaryText').textContent = summaryText;
+
+    var chipsWrap = document.getElementById('themeChips');
+    chipsWrap.innerHTML = '';
+    THEME_EXAMPLES[top].slice(0, 2).concat(THEME_EXAMPLES[grow].slice(0, 2)).forEach(function (label) {
+      var chip = document.createElement('span');
+      chip.className = 'theme-chip';
+      chip.textContent = label;
+      chipsWrap.appendChild(chip);
+    });
+  }
+
+  document.getElementById('retakeLink').addEventListener('click', function (e) {
+    e.preventDefault();
+    current = 0;
+    answerHistory = [];
+    scores = { purpose: 0, connections: 0, mind: 0, body: 0 };
+    summaryStep.hidden = true;
+    quizStep.hidden = false;
+    renderQuestion();
+  });
+
+  renderQuestion();
+})();
+</script>
 </body>
 </html>
